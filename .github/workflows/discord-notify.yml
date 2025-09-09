@@ -1,0 +1,23 @@
+name: Discord Notification on Issue Close
+
+on:
+  issues:
+    types: [closed]
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send Discord message
+        uses: Ilshidur/action-discord@master
+        with:
+          args: |
+            🎉 **Task Completed!**
+            **Title:** ${{ github.event.issue.title }}
+            **Closed by:** ${{ github.event.sender.login }}
+            **Assignee:** ${{ github.event.issue.assignee && github.event.issue.assignee.login || 'None' }}
+            **Labels:** ${{ join(github.event.issue.labels.*.name, ', ') || 'None' }}
+            **Link:** ${{ github.event.issue.html_url }}
+            **Repository:** ${{ github.repository }}
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK_URL }}
