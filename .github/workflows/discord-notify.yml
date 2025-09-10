@@ -8,6 +8,25 @@ jobs:
   notify:
     runs-on: ubuntu-latest
     steps:
+      - name: Extract Issue Data
+        id: issue_data
+        run: |
+          ASSIGNEE="${{ github.event.issue.assignee.login }}"
+          if [ -z "$ASSIGNEE" ]; then
+            ASSIGNEE="None"
+          fi
+
+          IFS=', '
+          LABELS=("${{ join(github.event.issue.labels.*.name, ', ') }}")
+          if [ -z "${LABELS[*]}" ]; then
+            LABELS_OUTPUT="None"
+          else
+            LABELS_OUTPUT="${LABELS[*]}"
+          fi
+
+          echo "ASSIGNEE=$ASSIGNEE" >> $GITHUB_ENV
+          echo "LABELS=$LABELS_OUTPUT" >> $GITHUB_ENV
+
       - name: Send Discord message
         uses: Ilshidur/action-discord@master
         with:
@@ -15,8 +34,8 @@ jobs:
             🎉 **Task Completed!**
             **Title:** ${{ github.event.issue.title }}
             **Closed by:** ${{ github.event.sender.login }}
-            **Assignee:** ${{ github.event.issue.assignee && github.event.issue.assignee.login || 'None' }}
-            **Labels:** ${{ join(github.event.issue.labels.*.name, ', ') || 'None' }}
+            **Assignee:** ${{ env.ASSIGNEE }}
+            **Labels:** ${{ env.LABELS }}
             **Link:** ${{ github.event.issue.html_url }}
             **Repository:** ${{ github.repository }}
         env:
