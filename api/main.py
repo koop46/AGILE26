@@ -5,22 +5,13 @@ from models import Base, User
 from security import get_password_hash
 from sqlalchemy.orm import Session
 import os
-from routers import auth, users
+from routers import users
 
 # Load environment variables with development defaults
 ADMIN_USERNAME = os.getenv("ADMIN_USERNAME", "dev_admin")
 ADMIN_EMAIL = os.getenv("ADMIN_EMAIL", "dev_admin@example.com")
 ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD", "dev_password")
 PRODUCTION = os.getenv("PRODUCTION", "false").lower() == "true"
-
-# Warn if using development defaults in production
-if PRODUCTION:
-    if ADMIN_USERNAME == "dev_admin":
-        print("WARNING: Using default admin username in production!")
-    if ADMIN_EMAIL == "dev_admin@example.com":
-        print("WARNING: Using default admin email in production!")
-    if ADMIN_PASSWORD == "dev_password":
-        print("WARNING: Using default admin password in production!")
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -54,7 +45,6 @@ async def lifespan(app: FastAPI):
 app = FastAPI(lifespan=lifespan)
 
 # Include routers
-app.include_router(auth.router, prefix='')
 app.include_router(users.router, prefix='/users')
 
 @app.get("/")
