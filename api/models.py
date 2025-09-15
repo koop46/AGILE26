@@ -3,7 +3,7 @@ from database import Base
 from datetime import datetime, timezone
 
 class User(Base):
-    
+
     __tablename__ = 'users'
     
     id = Column(Integer, primary_key=True)
