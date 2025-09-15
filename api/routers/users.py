@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from database import get_db
+from security import get_password_hash
 from models import User
 from schemas import UserCreate, UserUpdate, UserResponse
 from typing import List
@@ -8,12 +9,8 @@ from typing import List
 router = APIRouter()
 
 @router.post("/", response_model=UserResponse)
-def create_user(user: UserCreate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
-    # Check if current user is admin
-    if not current_user.is_admin:
-        raise HTTPException(status_code=403, detail="Only admins can create users")
+def create_user(user: UserCreate, db: Session = Depends(get_db)):
     
-    # Check for existing email or username
     if db.query(User).filter(User.email == user.email).first():
         raise HTTPException(status_code=400, detail="Email already registered")
     if db.query(User).filter(User.username == user.username).first():
@@ -33,25 +30,17 @@ def create_user(user: UserCreate, db: Session = Depends(get_db), current_user: U
     return db_user
 
 @router.get("/", response_model=List[UserResponse])
-def get_users(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
-    # Only admins can list all users
-    if not current_user.is_admin:
-        raise HTTPException(status_code=403, detail="Only admins can view all users")
+def get_users(db: Session = Depends(get_db)):
+
     return db.query(User).all()
 
-@router.get("/me", response_model=UserResponse)
-def get_current_user_profile(current_user: User = Depends(get_current_user)):
-    return current_user
 
 @router.put("/{user_id}", response_model=UserResponse)
-def update_user(user_id: int, user: UserUpdate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
-    # Users can only update their own profile unless admin
+def update_user(user_id: int, user: UserUpdate, db: Session = Depends(get_db)):
+
     db_user = db.query(User).filter(User.id == user_id).first()
     if not db_user:
         raise HTTPException(status_code=404, detail="User not found")
-    
-    if db_user.id != current_user.id and not current_user.is_admin:
-        raise HTTPException(status_code=403, detail="Can only update your own profile")
     
     # Update logic
     if user.username and user.username != db_user.username:
@@ -66,19 +55,13 @@ def update_user(user_id: int, user: UserUpdate, db: Session = Depends(get_db), c
     
     if user.password:
         db_user.password = get_password_hash(user.password)
-    
-    if user.is_admin is not None and current_user.is_admin:
-        db_user.is_admin = user.is_admin
-    
+        
     db.commit()
     db.refresh(db_user)
     return db_user
 
 @router.delete("/{user_id}")
-def delete_user(user_id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
-    # Only admins can delete users
-    if not current_user.is_admin:
-        raise HTTPException(status_code=403, detail="Only admins can delete users")
+def delete_user(user_id: int, db: Session = Depends(get_db)):
     
     user = db.query(User).filter(User.id == user_id).first()
     if not user:
