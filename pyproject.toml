@@ -1,0 +1,28 @@
+[project]
+name = "retention-exercises"
+version = "0.1.0"
+requires-python = ">=3.10"
+dependencies = [
+  "streamlit>=1.36",
+  "sqlmodel>=0.0.22",          # Pydantic v2 + SQLAlchemy
+  "sqlite-utils>=3.36",        # valfritt, smidigt vid debug
+  "python-dotenv>=1.0",
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=8",
+  "pytest-cov>=5",
+  "mypy>=1.10",
+  "ruff>=0.5",
+  "black>=24.8",
+  "types-python-dotenv",
+  "playwright>=1.47",          # (om ni vill köra browser-e2e)
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+
+[tool.black]
+line-length = 100
