@@ -1,0 +1,11 @@
+# Tabeller:
+
+# Quizzes - quiz_id, quiz_name, number_question, creator_id, created_at, update_at
+# Quiz_q_n_a - qna_id, quiz_id, question, answer, choice_1, choice_2, choice_3, choice_4
+# 
+
+
+# Köra api:
+# uvicorn main:app --reload     #api
+
+# streamlit run home.py         #appen
