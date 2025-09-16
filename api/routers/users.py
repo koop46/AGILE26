@@ -29,10 +29,19 @@ def create_user(user: UserCreate, db: Session = Depends(get_db)):
     db.refresh(db_user)
     return db_user
 
+
 @router.get("/", response_model=List[UserResponse])
-def get_users(db: Session = Depends(get_db)):
+def get_all_users(db: Session = Depends(get_db)):
 
     return db.query(User).all()
+
+
+@router.get("/{user_id}", response_model=UserResponse)
+def get_user(user_id: int, db: Session = Depends(get_db)):
+
+    db_user = db.query(User).filter(User.id == user_id).first()
+
+    return db_user
 
 
 @router.put("/{user_id}", response_model=UserResponse)
