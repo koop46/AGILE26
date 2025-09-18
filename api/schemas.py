@@ -42,7 +42,7 @@ class Qna(UserBase):
     choice_3: str
     choice_4: str
 
-    class QuizBase(BaseModel):
+class QuizBase(BaseModel):
     quiz_name: str
     number_question: int
     creator_id: int
