@@ -17,8 +17,8 @@ class User(Base):
 class Question(Base):
     __tablename__ = "questions"
 
-    qna_id = Column(Integer, primary_key=True, autoincrement=True)
-    quiz_id = Column(Integer, ForeignKey("quiz.quiz_id"), nullable=False)
+    qna_id = Column(Integer, primary_key=True, nullable=False)
+    quiz_id = Column(Integer, primary_key=True, nullable=False)
     question_text = Column(String, nullable=False)
 
     choice_1 = Column(String, nullable=False)

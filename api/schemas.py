@@ -42,5 +42,3 @@ class Qna(UserBase):
     choice_2: str
     choice_3: str
     choice_4: str
-
-
