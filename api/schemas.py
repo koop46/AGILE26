@@ -32,3 +32,15 @@ class UserResponse(UserBase):
     
     class Config:
         from_attributes = True
+
+class Qna(UserBase):
+    qna_id: int
+    quiz_id: int
+    question_text: str
+    answer: int
+    choice_1: str
+    choice_2: str
+    choice_3: str
+    choice_4: str
+
+
