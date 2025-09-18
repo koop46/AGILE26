@@ -1,11 +1,12 @@
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
-from database import engine, get_db
+from database import engine, get_db 
 from models import Base, User
 from security import get_password_hash
 from sqlalchemy.orm import Session
 import os
 from routers import users
+from routers import quizzes # <-- la till denna raden
 
 # Load environment variables with development defaults
 ADMIN_USERNAME = os.getenv("ADMIN_USERNAME", "dev_admin")
@@ -46,6 +47,7 @@ app = FastAPI(lifespan=lifespan)
 
 # Include routers
 app.include_router(users.router, prefix='/users')
+app.include_router(quizzes.router, prefix='/quizzes') # <-- la till denna
 
 @app.get("/")
 def health_check():

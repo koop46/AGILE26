@@ -32,3 +32,39 @@ class UserResponse(UserBase):
     
     class Config:
         from_attributes = True
+class Qna(UserBase):
+    qna_id: int
+    quiz_id: int
+    question_text: str
+    answer: int
+    choice_1: str
+    choice_2: str
+    choice_3: str
+    choice_4: str
+
+class QuizBase(BaseModel):
+    quiz_name: str
+    number_question: int
+    creator_id: int
+
+# Används: När man tar emot nya data(quiz) via POST -> IN till API:et
+# pass <-- tomt kodblock, dvs vi lägger inte till något mer än det vi har ärvt
+class QuizCreate(QuizBase):
+    pass 
+
+# För framtida PUT/PATCH-endpoints (valfritt)
+# Används: När du tar emot ÄNDRAD data via PUT/PATCH -> IN till API:et
+class QuizUpdate(BaseModel):
+    quiz_name: Optional[str] = None
+    number_question: Optional[int] = None
+    creator_id: Optional[int] = None
+
+# När man returnerar ett quiz från databasen
+# Används: När du SKICKAR TILLBAKA quiz-data till klienten -> UT från API:et
+class QuizResponse(QuizBase):
+    id: int
+    created_at: datetime
+    updated_at: datetime
+
+    class Config:
+        from_attributes = True
