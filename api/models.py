@@ -1,4 +1,4 @@
-from sqlalchemy import Boolean, Column, DateTime, Integer, String
+from sqlalchemy import Boolean, Column, DateTime, Integer, String, ForeignKey
 from database import Base
 from datetime import datetime, timezone
 
@@ -13,9 +13,20 @@ class User(Base):
     is_admin = Column(Boolean)
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
     updated_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
+class Question(Base):
+    __tablename__ = "questions"
 
+    qna_id = Column(Integer, primary_key=True, nullable=False)
+    quiz_id = Column(Integer, primary_key=True, nullable=False)
+    question_text = Column(String, nullable=False)
 
-# Quizzes-table - fält för tabellen
+    choice_1 = Column(String, nullable=False)
+    choice_2 = Column(String, nullable=False)
+    choice_3 = Column(String, nullable=False)
+    choice_4 = Column(String, nullable=False)
+
+    answer = Column(Integer, nullable=False)
+
 class Quiz(Base):
 
     __tablename__ = 'quizzes'

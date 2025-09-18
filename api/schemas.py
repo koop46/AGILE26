@@ -32,16 +32,17 @@ class UserResponse(UserBase):
     
     class Config:
         from_attributes = True
+class Qna(UserBase):
+    qna_id: int
+    quiz_id: int
+    question_text: str
+    answer: int
+    choice_1: str
+    choice_2: str
+    choice_3: str
+    choice_4: str
 
-
-
-
-
-# Schemas validering för Quizes-table
-# obs! ex: class QuizBase(BaseModel) --> ARV!
-
-# Gemensamma fält som alla versioner delar
-class QuizBase(BaseModel):
+    class QuizBase(BaseModel):
     quiz_name: str
     number_question: int
     creator_id: int
