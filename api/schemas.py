@@ -32,3 +32,38 @@ class UserResponse(UserBase):
     
     class Config:
         from_attributes = True
+
+
+
+
+
+# Schemas validering för Quizes-table
+# obs! ex: class QuizBase(BaseModel) --> ARV!
+
+# Gemensamma fält som alla versioner delar
+class QuizBase(BaseModel):
+    quiz_name: str
+    number_question: int
+    creator_id: int
+
+# Används: När man tar emot nya data(quiz) via POST -> IN till API:et
+# pass <-- tomt kodblock, dvs vi lägger inte till något mer än det vi har ärvt
+class QuizCreate(QuizBase):
+    pass 
+
+# För framtida PUT/PATCH-endpoints (valfritt)
+# Används: När du tar emot ÄNDRAD data via PUT/PATCH -> IN till API:et
+class QuizUpdate(BaseModel):
+    quiz_name: Optional[str] = None
+    number_question: Optional[int] = None
+    creator_id: Optional[int] = None
+
+# När man returnerar ett quiz från databasen
+# Används: När du SKICKAR TILLBAKA quiz-data till klienten -> UT från API:et
+class QuizResponse(QuizBase):
+    id: int
+    created_at: datetime
+    updated_at: datetime
+
+    class Config:
+        from_attributes = True
