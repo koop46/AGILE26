@@ -1,0 +1,110 @@
+/* Scope + variables so nothing leaks to other pages */
+#create-quiz{
+  --pill:   #8fb9df;
+  --accent: #8fb9df;
+  --muted: #f5f7fb;
+  --good:   #cfe9aa;
+  --shadow: 0 8px 20px rgba(0,0,0,.06);
+  --radius: 18px;
+  --radius-lg: 28px;
+}
+
+
+#create-quiz .brand-wrap{
+  text-align:center;
+  margin-bottom:20px;
+}
+#create-quiz .brand-pill{
+  display:inline-block;
+  padding:18px 28px;
+  border-radius:50px;
+  background:var(--pill);
+  color:#fff;
+  font-weight:bold;
+  font-size:24px;
+  box-shadow:var(--shadow);
+}
+
+/* QUESTION SECTION HEADER */
+#create-quiz .question-header{
+  text-align:center;
+  background:var(--muted);
+  color:#2c2c34;
+  font-weight:800;
+  letter-spacing:.5px;
+  padding:12px;
+  border-radius:var(--radius);
+  margin:10px 0 14px;
+}
+
+/* QUIZ TITLE */
+#create-quiz .quiz-title input{
+  height:  56px;
+  background: var(--muted);
+  box-shadow: var(--shadow);
+  padding: 12px 20px;
+  text-align:center;
+  color: var(--text, #2c2c34);
+}
+#create-quiz .quiz-title input::placeholder{
+  color: #a1a8b3 ;
+  font-weight: 500;
+}
+
+/* INPUTS */
+#create-quiz .stTextArea textarea,
+#create-quiz .stTextInput input{
+  background: var(--accent);
+  color: #fff;
+  border: none ;
+  border-radius: var(--r);
+  box-shadow: var(--shadow) ;
+}
+#create-quiz .choice-box.correct .stTextInput input{ 
+  background:var(--good); 
+  color:#2c2c34; }
+
+#create-quiz .stTextArea textarea::placeholder,
+#create-quiz .stTextInput input::placeholder{
+  color:#eef5ff;
+}
+
+/* CHOICES */
+#create-quiz .choice-box{ margin-bottom:14px; }
+#create-quiz .choice-box.correct .stTextInput input{
+  background: var(--good) !important;
+  color:#2c2c34 !important;
+  border:none !important;
+}
+
+/* BUTTONS */
+#create-quiz div.stButton > button{
+  border-radius: var(--radius-lg);
+  font-weight:800;
+  padding:12px 24px;
+  box-shadow: var(--shadow);
+}
+#create-quiz .btn-delete  > button{ background:#cfd8e3; color:#2c2c34; }
+#create-quiz .btn-prev    > button{ background:#cfd8e3; color:#2c2c34; }
+#create-quiz .btn-add     > button{ background:var(--brand); color:#fff; }
+#create-quiz .btn-save    > button{ background:var(--muted); color:#2c2c34; }
+
+#create-quiz div.stButton > button:hover{
+  transform: translateY(-1px);
+}
+
+/* RIGHT LIST CARD */
+#create-quiz .side-card{
+  background:#e9ecef;
+  border-radius:12px;
+  padding:12px;
+  box-shadow: var(--shadow);
+}
+
+
+#create-quiz .hint{
+  color:#ff6200;
+  font-weight:800;
+  text-transform:uppercase;
+  font-size:12px;
+}
