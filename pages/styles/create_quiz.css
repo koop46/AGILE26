@@ -9,7 +9,7 @@
   --radius-lg: 28px;
 }
 
-/* BRAND / HEADER */
+
 #create-quiz .brand-wrap{
   text-align:center;
   margin-bottom:20px;
@@ -43,7 +43,6 @@
   background: var(--muted);
   box-shadow: var(--shadow);
   padding: 12px 20px;
-  front-size: 24px;
   text-align:center;
   color: var(--text, #2c2c34);
 }
@@ -55,7 +54,7 @@
 /* INPUTS */
 #create-quiz .stTextArea textarea,
 #create-quiz .stTextInput input{
-  background: var(--accent) !important;
+  background: var(--accent);
   color: #fff;
   border: none ;
   border-radius: var(--r);
