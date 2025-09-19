@@ -1,0 +1,35 @@
+.st-key-remove button {
+    background-color: #f96767;
+    color: white;
+    font-size: 22px;
+    font-weight: bold;
+    padding: 12px 40px;
+    border-radius: 20px;
+    border: none;
+    cursor: pointer;
+    text-align: center;  
+}
+
+.st-key-edit button {
+    background-color: #8dbbe6;
+    color: white;
+    font-size: 22px;
+    font-weight: bold;
+    padding: 12px 40px;
+    border-radius: 20px;
+    border: none;
+    cursor: pointer;
+    text-align: center;  
+}
+
+.st-key-run button {
+    background-color: #8dbbe6;
+    color: white;
+    font-size: 22px;
+    font-weight: bold;
+    padding: 12px 40px;
+    border-radius: 20px;
+    border: none;
+    cursor: pointer;
+    text-align: center;  
+}
