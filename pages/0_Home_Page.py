@@ -2,7 +2,7 @@ import streamlit as st
 
 # Import CSS styles
 def load_css():
-    with open("pages/0_Home_Page.css") as f:
+    with open("pages/styles/0_Home_Page.css") as f:
         st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
 
 load_css()
