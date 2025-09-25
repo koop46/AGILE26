@@ -1,4 +1,6 @@
+# app.py  — minimal home page (no imports from your quiz code)
 import streamlit as st
 
-st.title("hello world")
+st.set_page_config(page_title="BrainTap", layout="wide")
 
+st.title("Home Page")

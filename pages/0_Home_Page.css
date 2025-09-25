@@ -1,0 +1,120 @@
+
+/*---------------- LOGO ----------------*/
+
+div[data-testid="stColumn"]:has(#col-2) {
+    background: linear-gradient(135deg, #667eea 0%, #adb5dc 100%) !important;
+    border: 2px solid #fff !important;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2) !important;
+    padding: 20px !important;
+    margin-bottom: 200px;
+    border-radius: 10px !important;
+    text-align: center !important;
+    display: inline !important;
+    flex-direction: column !important;
+    justify-content: center !important;
+    align-items: center !important;
+    max-width: 300px;
+    max-height: 100px;
+
+}
+
+div[data-testid="stColumn"]:has(#col-2) h1{
+    color: #fff !important;
+    text-align: center !important;
+    font-weight: bold !important;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.5) !important;
+    margin: 0px !important;;
+    padding: 0px !important;
+    justify-content: center !important;
+
+}
+
+/*---------------- LOGO ----------------*/
+
+
+/* Centered button container */
+.centered-button-container {
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    width: auto !important;
+}
+
+button[data-testid="stBaseButton-secondary"][key="main_quiz_button"]:hover {
+    color: #fff !important;
+    font-size: 36px !important;
+    transform: translateY(-5px) !important;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.3) !important;
+    background: linear-gradient(135deg, #667eea 0%, #adb5dc 100%) !important;
+}
+
+/* Style for Take buttons - */
+button[kind="secondary"] {
+    background: linear-gradient(135deg, #667eea 0%, #adb5dc 100%) !important;
+    border: 2px solid #fff !important;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15) !important;
+    border-radius: 8px !important;
+    color: #fff !important;
+    font-size: 16px !important;
+    font-weight: bold !important;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.3) !important;
+    padding: 10px 20px !important;
+    transition: all 0.3s ease !important;
+    text-align: center !important;
+    min-width: 80px !important;
+}
+
+/* Take button hover effect */
+button[kind="secondary"]:hover {
+    color: #fff !important;
+    font-size: 16px !important;
+    transform: translateY(-2px) !important;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2) !important;
+    background: linear-gradient(135deg, #344aaa 0%, #515c94 100%) !important;
+}
+
+/* Style each quiz card */
+div:has(> .quiz-marker) {
+    background: #f8f9fa;
+    border: 1px solid #ddd;
+    padding: 16px;
+    border-radius: 10px;
+    margin-bottom: 12px;
+  }
+  
+  /* Optional hover effect */
+  div:has(> .quiz-marker):hover {
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    transform: translateY(-2px);
+    transition: all 0.2s ease;
+  }
+
+  
+
+/* Style for Create Quiz button - primary buttons */
+button[kind="primary"] {
+    background: linear-gradient(135deg, #667eea 0%, #adb5dc 100%) !important;
+    border: 2px solid #fff !important;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2) !important;
+    border-radius: 10px !important;
+    color: #fff !important;
+    font-size: 36px !important;
+    font-weight: bold !important;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.5) !important;
+    padding: 24px 65px !important;
+    transition: all 0.3s ease !important;
+    text-align: center !important;
+    margin-top: 0px;
+}
+
+button[kind="primary"]:hover {
+    color: #fff !important;
+    font-size: 36px !important;
+    transform: translateY(-5px) !important;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.3) !important;
+    background: linear-gradient(135deg, #344aaa 0%, #515c94 100%) !important;
+}
+
+
+
+
