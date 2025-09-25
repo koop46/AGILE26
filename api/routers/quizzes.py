@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from database import get_db
-from models import Quiz
+from models import Quiz, Question
 from schemas import QuizCreate, QuizResponse, QuizUpdate
 from typing import List
 
@@ -20,11 +20,17 @@ router = APIRouter(     #routing-objekt -> Skapar en grupp av endpoints
 #för POST/quizzes --> Skapa nytt quiz
 @router.post("/", response_model=QuizResponse)
 def create_quiz(quiz: QuizCreate, db: Session = Depends(get_db)):    
-    db_quiz = Quiz(**quiz.dict()) # <-- Vrf överstreckad?
+    data = quiz.dict(exclude={"questions"})
+    db_quiz = Quiz(**data) # <-- Vrf överstreckad?
+    db_quiz.questions = [Question(**q.dict()) for q in quiz.questions] if quiz.questions else []
     db.add(db_quiz)
     db.commit()
     db.refresh(db_quiz)
     return db_quiz
+    
+
+
+    
 
 #för GET/quizzes --> Hämta ALLA quiz
 @router.get("/", response_model=List[QuizResponse])

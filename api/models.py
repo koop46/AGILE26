@@ -1,4 +1,5 @@
 from sqlalchemy import Boolean, Column, DateTime, Integer, String, ForeignKey
+from sqlalchemy.orm import relationship
 from database import Base
 from datetime import datetime, timezone
 
@@ -20,7 +21,7 @@ class Question(Base):
     __tablename__ = "questions"
 
     qna_id = Column(Integer, primary_key=True, nullable=False)
-    quiz_id = Column(Integer, nullable=False)
+    quiz_id = Column(Integer, ForeignKey("quizzes.id"), nullable=False)
     question_text = Column(String, nullable=False)
 
     choice_1 = Column(String, nullable=False)
@@ -29,6 +30,7 @@ class Question(Base):
     choice_4 = Column(String, nullable=False)
 
     answer = Column(Integer, nullable=False)
+    quiz = relationship("Quiz", back_populates="questions")
 
 
 class Quiz(Base):
@@ -42,5 +44,6 @@ class Quiz(Base):
     creator_id = Column(Integer, nullable=False)  # ev. ForeignKey till User.id senare
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
     updated_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
+    questions = relationship("Question", back_populates="quiz", cascade="all, delete-orphan")
 
 

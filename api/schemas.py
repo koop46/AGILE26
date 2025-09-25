@@ -32,16 +32,7 @@ class UserResponse(UserBase):
     
     class Config:
         from_attributes = True
-        
-class Qna(UserBase):
-    qna_id: int
-    quiz_id: int
-    question_text: str
-    answer: int
-    choice_1: str
-    choice_2: str
-    choice_3: str
-    choice_4: str
+
 
 class QnaBase(BaseModel):
     question_text: str
@@ -51,12 +42,19 @@ class QnaBase(BaseModel):
     choice_4: str
     answer: int
 
+class QnaResponse(QnaBase):
+    qna_id: int
+    quiz_id: int
+
+    class Config:
+        orm_mode = True
+
 class QuizBase(BaseModel):
     quiz_name: str
     number_question: int
     creator_id: int
 
-    questions: Optional[List[QnaBase]] = None
+    questions: Optional[List[QnaResponse]] = None
 
 
 # Används: När man tar emot nya data(quiz) via POST -> IN till API:et
@@ -79,4 +77,4 @@ class QuizResponse(QuizBase):
     updated_at: datetime
 
     class Config:
-        from_attributes = True
+        orm_mode = True
