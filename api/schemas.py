@@ -32,8 +32,6 @@ class UserResponse(UserBase):
     
     class Config:
         from_attributes = True
-<<<<<<< Updated upstream
-=======
 
 
 
@@ -46,7 +44,6 @@ class Qna(UserBase):
     choice_2: str
     choice_3: str
     choice_4: str
->>>>>>> Stashed changes
 
 
 
