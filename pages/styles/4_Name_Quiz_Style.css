@@ -1,0 +1,43 @@
+
+.st-key-back button {
+    background-color: #8dbbe6;
+    color: white;
+    font-size: 22px;
+    font-weight: bold;
+    padding: 12px 40px;
+    border-radius: 20px;
+    border: none;
+    cursor: pointer;
+    text-align: center;  
+}
+
+.st-key-save button {
+    background-color: #8dbbe6;
+    color: white;
+    font-size: 22px;
+    font-weight: bold;
+    padding: 12px 40px;
+    border-radius: 20px;
+    border: none;
+    cursor: pointer;
+    text-align: center; 
+     
+}
+.st-key-textInput input {
+    background-color: #8dbbe6;
+    text-align: center;
+    color: white;
+    font-weight: bold;
+    font-size: 24px;
+    padding: 20px;
+    border-radius: 10px;
+    margin-bottom: 30px;
+    font-family: 'Segoe UI', sans-serif; 
+}
+
+
+
+
+
+
+

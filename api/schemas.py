@@ -1,6 +1,6 @@
 from datetime import datetime
 from pydantic import BaseModel
-from typing import Optional
+from typing import Optional, List, Tuple
 
 class UserBase(BaseModel):
     username: str
@@ -51,6 +51,10 @@ class Qna(UserBase):
     quiz_id: int
     question_text: str
     answer: int
+
+    
+class QnaBase(BaseModel):
+    question_text: str
     choice_1: str
     choice_2: str
     choice_3: str
@@ -64,11 +68,16 @@ class Qna(UserBase):
 # obs! ex: class QuizBase(BaseModel) --> ARV!
 
 # Gemensamma fält som alla versioner delar
+    answer: int
+
 class QuizBase(BaseModel):
     quiz_name: str
     is_active: bool
     number_question: int
     creator_id: int
+
+    questions: Optional[List[QnaBase]] = None
+
 
 # Används: När man tar emot nya data(quiz) via POST -> IN till API:et
 # pass <-- tomt kodblock, dvs vi lägger inte till något mer än det vi har ärvt
