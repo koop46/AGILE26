@@ -32,6 +32,21 @@ class UserResponse(UserBase):
     
     class Config:
         from_attributes = True
+<<<<<<< Updated upstream
+=======
+
+
+
+class Qna(UserBase):
+    qna_id: int
+    quiz_id: int
+    question_text: str
+    answer: int
+    choice_1: str
+    choice_2: str
+    choice_3: str
+    choice_4: str
+>>>>>>> Stashed changes
 
 
 
@@ -43,6 +58,7 @@ class UserResponse(UserBase):
 # Gemensamma fält som alla versioner delar
 class QuizBase(BaseModel):
     quiz_name: str
+    is_active: bool
     number_question: int
     creator_id: int
 
@@ -55,6 +71,7 @@ class QuizCreate(QuizBase):
 # Används: När du tar emot ÄNDRAD data via PUT/PATCH -> IN till API:et
 class QuizUpdate(BaseModel):
     quiz_name: Optional[str] = None
+    is_active: Optional[bool] = None
     number_question: Optional[int] = None
     creator_id: Optional[int] = None
 
@@ -62,6 +79,7 @@ class QuizUpdate(BaseModel):
 # Används: När du SKICKAR TILLBAKA quiz-data till klienten -> UT från API:et
 class QuizResponse(QuizBase):
     id: int
+    is_active: bool
     created_at: datetime
     updated_at: datetime
 

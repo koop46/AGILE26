@@ -22,6 +22,7 @@ class Quiz(Base):
 
     id = Column(Integer, primary_key=True)
     quiz_name = Column(String, nullable=False)
+    is_active = Column(Boolean, default=True, nullable=False)
     number_question = Column(Integer, nullable=False)
     creator_id = Column(Integer, nullable=False)  # ev. ForeignKey till User.id senare
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
