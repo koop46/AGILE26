@@ -32,6 +32,8 @@ class UserResponse(UserBase):
     
     class Config:
         from_attributes = True
+
+        
 class Qna(UserBase):
     qna_id: int
     quiz_id: int
@@ -42,7 +44,6 @@ class Qna(UserBase):
     choice_3: str
     choice_4: str
 
-<<<<<<< HEAD
 
 
 class Qna(UserBase):
@@ -63,8 +64,6 @@ class Qna(UserBase):
 # obs! ex: class QuizBase(BaseModel) --> ARV!
 
 # Gemensamma fält som alla versioner delar
-=======
->>>>>>> origin/BUFFER_BRANCH
 class QuizBase(BaseModel):
     quiz_name: str
     is_active: bool
