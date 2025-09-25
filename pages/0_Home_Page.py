@@ -59,10 +59,14 @@ def create_quiz_dialog():
         res = requests.post(QUIZ_CREATE_URL, json=payload)
         if res.ok:
             st.success("✅ Quiz created!")
+            st.session_state["selected_quiz_id"] = quiz["id"]
+            st.switch_page("pages/1_Create_Quiz.py")
             st.session_state.create_open = False
             st.rerun()
         else:
             st.error(f"❌ {res.text}")
+
+quizzes = fetch_quizzes()
 
 # First Row ---------------------------------------------------------------------------
 col1_1, col1_2, col1_3 = st.columns([1,1,1])
@@ -74,16 +78,8 @@ st.html("<style>[data-testid='stHeaderActionElements'] {display: none;}</style>"
 
 
 # Second Row ---------------------------------------------------------------------------
-col2_1,col2_2,col2_3 = st.columns(3)
 
-# (TEST) Delets all existing quizes
-with col2_1:
-    if st.button("Delete Quizzes"):
-        deleted = delete_all_quizzes()
-        st.success(f"✅ Deleted {deleted} quizzes")
-        st.rerun()
 
-quizzes = fetch_quizzes()
 
 # Third Row ---------------------------------------------------------------------------
 col3_1, col3_2, col3_3 = st.columns([2,1,4])
@@ -96,20 +92,42 @@ with col3_1:
     if st.session_state.create_open:
         create_quiz_dialog()
 
-# Lists all available quizes
 with col3_3:
     if quizzes:
         for quiz in quizzes:
             with st.container():
                 col_a, col_b = st.columns([5, 1])
                 with col_a:
-                    st.write(f"📘 {quiz['quiz_name']}")
+                    st.write(f"📘 ID: {quiz['id']} — {quiz['quiz_name']}")
                 with col_b:
                     if st.button("Take", key=f"take_{quiz['id']}"):
-                        st.write(f"Taking quiz: {quiz['quiz_name']}")
+                        # Save quiz id in session state
+                        st.session_state["selected_quiz_id"] = quiz["id"]
+                        # Switch to Preview page
+                        st.switch_page("pages/5_Quiz_Preview.py")
     else:
         st.info("No quizzes found yet. Create one to get started!")
 
 load_css()
 
 
+
+
+
+
+
+
+# ss = st.session_state
+# if "quiz_tuples" not in ss:
+#     ss.quiz_tuples = []   
+
+# current_tuple = (
+#     qtext,                      # question (str)
+#     (v0, v1, v2, v3),           # answers (tuple of 4)
+#     correct_idx                 # rightAnswerID (0-based to match your radio)
+# )
+
+# # Add button to store the current question as a tuple
+# if st.button("Add question"):
+#     ss.quiz_tuples.append(current_tuple)
+#     st.success("Question added to tuple list.")

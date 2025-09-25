@@ -19,8 +19,30 @@
     border-radius: 20px;
     border: none;
     cursor: pointer;
-    text-align: center;  
+    text-align: center !important;  
 }
+
+.quiz-preview-box {
+    background-color: #f8f9fa;  /* light background */
+    padding-left: 50px;
+    padding-right: 50px;
+    padding-top: 0px;
+    padding-bottom: 0px;
+    border-radius: 12px;
+    text-align: center;
+    box-shadow: 0px 2px 6px rgba(0,0,0,0.1);
+    margin-top: 0px;
+}
+
+.quiz-title {
+    font-size: 28px;
+    font-weight: 700;
+    color: #88bde6;
+    margin: 0;
+    size: auto;
+    text-align: center;
+}
+
 
 .st-key-run button {
     background-color: #8dbbe6;
