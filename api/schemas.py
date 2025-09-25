@@ -43,14 +43,20 @@ class Qna(UserBase):
     choice_3: str
     choice_4: str
 
-QuestionTuple = Tuple[str, str, str, str, str, int]
+class QnaBase(BaseModel):
+    question_text: str
+    choice_1: str
+    choice_2: str
+    choice_3: str
+    choice_4: str
+    answer: int
 
 class QuizBase(BaseModel):
     quiz_name: str
     number_question: int
     creator_id: int
 
-    questions: Optional[List[QuestionTuple]] = None
+    questions: Optional[List[QnaBase]] = None
 
 
 # Används: När man tar emot nya data(quiz) via POST -> IN till API:et
