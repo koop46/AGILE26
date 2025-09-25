@@ -19,13 +19,12 @@ router = APIRouter(     #routing-objekt -> Skapar en grupp av endpoints
 )
 #för POST/quizzes --> Skapa nytt quiz
 @router.post("/", response_model=QuizResponse)
-def create_quiz(quiz: QuizCreate, db: Session = Depends(get_db)):
+def create_quiz(quiz: QuizCreate, db: Session = Depends(get_db)):    
     db_quiz = Quiz(**quiz.dict()) # <-- Vrf överstreckad?
     db.add(db_quiz)
     db.commit()
     db.refresh(db_quiz)
     return db_quiz
-
 
 #för GET/quizzes --> Hämta ALLA quiz
 @router.get("/", response_model=List[QuizResponse])

@@ -1,6 +1,6 @@
 from datetime import datetime
 from pydantic import BaseModel
-from typing import Optional
+from typing import Optional, List, Tuple
 
 class UserBase(BaseModel):
     username: str
@@ -32,6 +32,7 @@ class UserResponse(UserBase):
     
     class Config:
         from_attributes = True
+        
 class Qna(UserBase):
     qna_id: int
     quiz_id: int
@@ -42,10 +43,15 @@ class Qna(UserBase):
     choice_3: str
     choice_4: str
 
+QuestionTuple = Tuple[str, str, str, str, str, int]
+
 class QuizBase(BaseModel):
     quiz_name: str
     number_question: int
     creator_id: int
+
+    questions: Optional[List[QuestionTuple]] = None
+
 
 # Används: När man tar emot nya data(quiz) via POST -> IN till API:et
 # pass <-- tomt kodblock, dvs vi lägger inte till något mer än det vi har ärvt
