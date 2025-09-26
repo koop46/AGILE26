@@ -45,21 +45,13 @@ class Qna(UserBase):
     choice_4: str
 
 
-
-class Qna(UserBase):
-    qna_id: int
-    quiz_id: int
-    question_text: str
-    answer: int
-
-    
 class QnaBase(BaseModel):
     question_text: str
     choice_1: str
     choice_2: str
     choice_3: str
     choice_4: str
-
+    answer: int
 
 
 
@@ -68,8 +60,6 @@ class QnaBase(BaseModel):
 # obs! ex: class QuizBase(BaseModel) --> ARV!
 
 # Gemensamma fält som alla versioner delar
-    answer: int
-
 class QuizBase(BaseModel):
     quiz_name: str
     is_active: bool
