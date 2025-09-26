@@ -5,8 +5,8 @@ from models import Base, User
 from security import get_password_hash
 from sqlalchemy.orm import Session
 import os
-from routers import users
-from routers import quizzes # <-- la till denna raden
+from routers import users, quizzes, submissions
+
 
 # Load environment variables with development defaults
 ADMIN_USERNAME = os.getenv("ADMIN_USERNAME", "dev_admin")
@@ -48,6 +48,8 @@ app = FastAPI(lifespan=lifespan)
 # Include routers
 app.include_router(users.router, prefix='/users')
 app.include_router(quizzes.router, prefix='/quizzes') # <-- la till denna
+app.include_router(submissions.router, prefix='/submissions')
+
 
 @app.get("/")
 def health_check():

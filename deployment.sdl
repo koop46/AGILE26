@@ -1,0 +1,53 @@
+---
+version: "2.0"
+services:
+  frontend:
+    image: p00k46/agile26-frontend:v0.0.1
+    expose:
+      - port: 8501
+        as: 8501
+        to:
+          - global: true
+  service-2:
+    image: p00k46/agile26-api:v0.0.1
+    expose:
+      - port: 8000
+        as: 8000
+        to:
+          - global: true
+profiles:
+  compute:
+    frontend:
+      resources:
+        cpu:
+          units: 1
+        memory:
+          size: 128Mi
+        storage:
+          - size: 128mi
+    service-2:
+      resources:
+        cpu:
+          units: 1
+        memory:
+          size: 128Mi
+        storage:
+          - size: 128mi
+  placement:
+    dcloud:
+      pricing:
+        frontend:
+          denom: uakt
+          amount: 100000
+        service-2:
+          denom: uakt
+          amount: 100000
+deployment:
+  frontend:
+    dcloud:
+      profile: frontend
+      count: 1
+  service-2:
+    dcloud:
+      profile: service-2
+      count: 1

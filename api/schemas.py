@@ -32,6 +32,7 @@ class UserResponse(UserBase):
     
     class Config:
         from_attributes = True
+
 class Qna(UserBase):
     qna_id: int
     quiz_id: int
@@ -68,3 +69,20 @@ class QuizResponse(QuizBase):
 
     class Config:
         from_attributes = True
+
+
+
+class SubmissionRequest(BaseModel):
+            pre_test: dict
+            post_test: dict
+
+class SubmissionResponse(BaseModel):
+            n_users: int
+            question_per_user: int
+            pre_test_pct: float
+            post_test_pct: float
+            p_value:float
+            mean_improvement: float
+            std_improvement: float
+            cohens_d: float
+            t_stat: float
