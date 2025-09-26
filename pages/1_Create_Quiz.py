@@ -117,13 +117,13 @@ def page_add_questions():
     with col_right:
         st.markdown('<div class="btn-add">', unsafe_allow_html=True)
         if st.button("ADD"):
-            if save_editor_into_questions(new_slot=not ss.get("questions"), show_errors=False):
+            if save_editor_into_questions(new_slot=not ss.get("questions")):
                 load_into_editor(None)
         st.markdown("</div>", unsafe_allow_html=True)
 
         st.markdown('<div class="btn-save">', unsafe_allow_html=True)
         if st.button("SAVE"):
-            save_editor_into_questions(new_slot=False, show_errors=True)
+            save_editor_into_questions(new_slot=False)
         st.markdown("</div>", unsafe_allow_html=True)
 
     total = len(ss.get("questions", []))
