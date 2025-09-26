@@ -9,3 +9,6 @@ __pycache__/
 # Ignore virtual environment folders
 venv/
 env/
+
+api/__pycache__/
+AGILE26/api/routers/__pycache__
