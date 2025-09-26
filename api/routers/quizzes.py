@@ -12,11 +12,10 @@ from typing import List
 #     QuizResponse för att BETÄMMA HUR SVARET SKA SE UT
 
 
+router = APIRouter(tags=["Quizzes"])
 
-router = APIRouter(     #routing-objekt -> Skapar en grupp av endpoints
-    prefix="/quizzes",  #Gör att alla endpoints börjar med /quizzes
-    tags=["quizzes"]    #Visar rubrik i /docs för denna grupp
-)
+
+
 #för POST/quizzes --> Skapa nytt quiz
 @router.post("/", response_model=QuizResponse)
 def create_quiz(quiz: QuizCreate, db: Session = Depends(get_db)):    
@@ -66,4 +65,5 @@ def delete_quiz(quiz_id: int, db: Session = Depends(get_db)):
     db.delete(quiz)
     db.commit()
     return {"detail": "Quiz deleted"}
+
 
