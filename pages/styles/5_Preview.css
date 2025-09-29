@@ -8,6 +8,7 @@
     border: none;
     cursor: pointer;
     text-align: center;  
+    margin-top: 100px;  
 }
 
 .st-key-edit button {
@@ -19,7 +20,8 @@
     border-radius: 20px;
     border: none;
     cursor: pointer;
-    text-align: center !important;  
+    text-align: center !important;
+    margin-top: 100px;  
 }
 
 .quiz-preview-box {
@@ -33,6 +35,33 @@
     box-shadow: 0px 2px 6px rgba(0,0,0,0.1);
     margin-top: 0px;
 }
+
+
+.question-preview-box {
+    background-color: #f8f9fa;  /* light background */
+    padding-left: 50px;
+    padding-right: 50px;
+    padding-top: 0px;
+    padding-bottom: 0px;
+    border-radius: 12px;
+    text-align: center;
+    box-shadow: 0px 2px 6px rgba(0,0,0,0.1);
+    margin-top: 100px;
+    margin-bottom: 20px;
+}
+
+.answers-preview-box {
+    background-color: #f8f9fa;  /* light background */
+    padding-left: 50px;
+    padding-right: 50px;
+    padding-top: 0px;
+    padding-bottom: 0px;
+    border-radius: 12px;
+    text-align: center;
+    box-shadow: 0px 2px 6px rgba(0,0,0,0.1);
+    margin-top: 50px;
+}
+
 
 .quiz-title {
     font-size: 28px;
@@ -54,4 +83,5 @@
     border: none;
     cursor: pointer;
     text-align: center;  
+    margin-top: 100px;  
 }
