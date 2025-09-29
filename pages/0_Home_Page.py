@@ -60,8 +60,8 @@ def create_quiz_dialog():
         if res.ok:
             st.success("✅ Quiz created!")
             st.session_state["selected_quiz_id"] = quiz["id"]
-            st.switch_page("pages/1_Create_Quiz.py")
             st.session_state.create_open = False
+            st.switch_page("pages/1_Create_Quiz.py")
             st.rerun()
         else:
             st.error(f"❌ {res.text}")
@@ -98,7 +98,7 @@ with col3_3:
             with st.container():
                 col_a, col_b = st.columns([5, 1])
                 with col_a:
-                    st.write(f"📘 ID: {quiz['id']} — {quiz['quiz_name']}")
+                    st.write(f"{quiz['quiz_name']}")
                 with col_b:
                     if st.button("Take", key=f"take_{quiz['id']}"):
                         # Save quiz id in session state
@@ -109,25 +109,3 @@ with col3_3:
         st.info("No quizzes found yet. Create one to get started!")
 
 load_css()
-
-
-
-
-
-
-
-
-# ss = st.session_state
-# if "quiz_tuples" not in ss:
-#     ss.quiz_tuples = []   
-
-# current_tuple = (
-#     qtext,                      # question (str)
-#     (v0, v1, v2, v3),           # answers (tuple of 4)
-#     correct_idx                 # rightAnswerID (0-based to match your radio)
-# )
-
-# # Add button to store the current question as a tuple
-# if st.button("Add question"):
-#     ss.quiz_tuples.append(current_tuple)
-#     st.success("Question added to tuple list.")
