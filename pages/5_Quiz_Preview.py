@@ -11,7 +11,7 @@ quiz_id = st.session_state.get("selected_quiz_id")
 
 st.set_page_config(page_title="Quiz Preview", layout="centered")
 
-ss = st.session_state          # <— alias so 'ss' exists
+ss = st.session_state
 
 quiz = [
     ("What is the capital of France?", ("Paris", "London", "Berlin", "Rome"), 0),
@@ -56,56 +56,73 @@ with r1c2:
     if quiz_id:
         r = requests.get(f"{API_BASE}/quizzes/quizzes/{quiz_id}")
         if r.ok:
-            quiz = r.json()
+            quiz_data = r.json()
             st.markdown(
                 f"""
                 <div class="quiz-preview-box">
-                    <h2 class="quiz-title">{quiz['quiz_name']}</h2>
+                    <h2 class="quiz-title">{quiz_data.get('quiz_name', 'Untitled Quiz')}</h2>
                 </div>
                 """,
                 unsafe_allow_html=True
             )
+
+            # --- first question ---
+            questions = quiz_data.get("questions", [])
+            if questions:
+                first_q = questions[0]
+                q_text = first_q.get("text") or first_q.get("question") or ""
+                choices = first_q.get("choices") or []
+                correct_index = first_q.get("correct_index", 0)
+
+                # normalize choices to length 4
+                choices = list(choices)[:4] + [""] * max(0, 4 - len(choices))
+
+                st.session_state.editing = {
+                    "text": q_text,
+                    "choices": choices,
+                    "correct_index": int(correct_index)
+                }
+            else:
+                st.warning("This quiz has no questions.")
         else:
             st.error("Quiz not found")
     else:
         st.warning("No quiz selected. Go back and pick one.")
 
-r2c1, r2c2, r2c3 = st.columns([0.2, 1, 0.2])
-with r2c2:
-    if quiz_id:
-        r = requests.get(f"{API_BASE}/quizzes/quizzes/{quiz_id}")
-        if r.ok:
-            quiz = r.json()
-            st.markdown(
-                f"""
-                <div class="question-preview-box">
-                    <h3 class="quiz-question">{"hej"}</h3>
-                </div>
-                """,
-                unsafe_allow_html=True
-            )
+# --- render question text ---
+if "editing" in st.session_state:
+    e = st.session_state.editing
+    r2c1, r2c2, r2c3 = st.columns([0.2, 1, 0.2])
+    with r2c2:
+        st.markdown(
+            f"""
+            <div class="question-preview-box">
+                <h3 class="quiz-question">{e['text']}</h3>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
 
-def show_choice(i, placeholder):
-    txt = e["choices"][i] or placeholder
-    badge = "ABCD"[i]  # or symbols ▲◆●■
-    st.markdown(
-        f"""
-        <div class="answers-preview-box {'correct' if e['correct_index'] == i else ''}">
-            <div class="choice-badge">{badge}</div>
-            <h3 class="quiz-choice">{txt}</h3>
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
+    # ---- render choices ----
+    def show_choice(i, placeholder):
+        txt = e["choices"][i] or placeholder
+        st.markdown(
+            f"""
+            <div class="answers-preview-box {'correct' if e['correct_index'] == i else ''}">
+                <h3 class="quiz-choice">{txt}</h3>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
 
-# ---- layout (2x2) ----
-r3c1, r3c2 = st.columns(2, gap="small")
-with r3c1: show_choice(0, "Choice 1")
-with r3c2: show_choice(1, "Choice 2")
+    r3c1, r3c2 = st.columns(2, gap="small")
+    with r3c1: show_choice(0, "Choice 1")
+    with r3c2: show_choice(1, "Choice 2")
 
-r4c1, r4c2 = st.columns(2, gap="small")
-with r4c1: show_choice(2, "Choice 3")
-with r4c2: show_choice(3, "Choice 4")
+    r4c1, r4c2 = st.columns(2, gap="small")
+    with r4c1: show_choice(2, "Choice 3")
+    with r4c2: show_choice(3, "Choice 4")
+
 
 
 
@@ -127,8 +144,12 @@ with r5c1:
 
 with r5c2:
     if st.button("Edit", key="edit"):
-        st.session_state["selected_quiz_id"] = quiz["id"]
-        st.switch_page("pages/1_Create_Quiz.py")
+        if quiz_id:
+            st.session_state["selected_quiz_id"] = int(quiz_id)
+            st.switch_page("pages/1_Create_Quiz.py")
+        else:
+            st.warning("No quiz selected.")
+
 
 with r5c3:
     if st.button("Run Quiz", key="run"):

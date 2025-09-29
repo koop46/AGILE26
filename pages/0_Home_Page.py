@@ -47,6 +47,10 @@ def delete_all_quizzes():
 
 load_css()
 
+st.markdown("<h1 style='text-align: center; color: #88bde6;'>📘 BrainTap</h1>", unsafe_allow_html=True)
+
+st.markdown("---")
+
 # Create quiz popup window
 @st.dialog("Create a new quiz")
 def create_quiz_dialog():
@@ -68,23 +72,10 @@ def create_quiz_dialog():
 
 quizzes = fetch_quizzes()
 
-# First Row ---------------------------------------------------------------------------
-col1_1, col1_2, col1_3 = st.columns([1,1,1])
-
-with col1_2:
-    st.markdown("""<div id="hero-col"><h1>BrainTap</h1></div>""", unsafe_allow_html=True)
-st.html("<style>[data-testid='stHeaderActionElements'] {display: none;}</style>")
-
-
-
 # Second Row ---------------------------------------------------------------------------
+r2c1, r2c2, r2c3 = st.columns([1,1,1])
 
-
-
-# Third Row ---------------------------------------------------------------------------
-col3_1, col3_2, col3_3 = st.columns([2,1,4])
-
-with col3_1:
+with r2c2:
 # Create Quiz button
     if st.button("Create a Quiz", key="main_quiz_button", type="primary"):
         st.session_state.create_open = True
@@ -92,7 +83,13 @@ with col3_1:
     if st.session_state.create_open:
         create_quiz_dialog()
 
-with col3_3:
+
+# Third Row ---------------------------------------------------------------------------
+r3c1, r3c2, r3c3 = st.columns([0.2,3,0.2])
+
+
+
+with r2c2:
     if quizzes:
         for quiz in quizzes:
             with st.container():
