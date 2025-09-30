@@ -1,5 +1,5 @@
 .st-key-remove button {
-    background-color: #f96767;
+    background: linear-gradient(135deg, #a62836 0%, #e89c9c 100%) !important;
     color: white;
     font-size: 22px;
     font-weight: bold;
@@ -8,10 +8,20 @@
     border: none;
     cursor: pointer;
     text-align: center;  
+    margin-top: 100px;  
+    transition: all 0.3s ease !important;
+}
+
+.st-key-remove button:hover {
+    color: #fff !important;
+    font-size: 16px !important;
+    transform: translateY(-2px) !important;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2) !important;
+    background: linear-gradient(135deg, #4f1018 0%, #944949 100%) !important;
 }
 
 .st-key-edit button {
-    background-color: #8dbbe6;
+    background: linear-gradient(135deg, #89d9f9 0%, #adb5dc 100%) !important;
     color: white;
     font-size: 22px;
     font-weight: bold;
@@ -19,11 +29,69 @@
     border-radius: 20px;
     border: none;
     cursor: pointer;
-    text-align: center;  
+    text-align: center !important;
+    margin-top: 100px;  
+    transition: all 0.3s ease !important;
 }
 
+.st-key-edit button:hover {
+    color: #fff !important;
+    font-size: 16px !important;
+    transform: translateY(-2px) !important;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2) !important;
+    background: linear-gradient(135deg, #588ca0 0%, #8087ac 100%) !important; 
+}
+
+.quiz-preview-box {
+
+    padding-left: 50px;
+    padding-right: 50px;
+    padding-top: 0px;
+    padding-bottom: 0px;
+    border-radius: 12px;
+    text-align: center;
+    margin-top: 0px;
+}
+
+
+.question-preview-box {
+
+    padding-left: 50px;
+    padding-right: 50px;
+    padding-top: 0px;
+    padding-bottom: 0px;
+    border-radius: 12px;
+    text-align: center;
+    box-shadow: 0px 2px 6px rgba(0,0,0,0.1);
+    margin-top: 100px;
+    margin-bottom: 20px;
+}
+
+.answers-preview-box {
+
+    padding-left: 50px;
+    padding-right: 50px;
+    padding-top: 0px;
+    padding-bottom: 0px;
+    border-radius: 12px;
+    text-align: center;
+    box-shadow: 0px 2px 6px rgba(0,0,0,0.1);
+    margin-top: 50px;
+}
+
+
+.quiz-title {
+    font-size: 28px;
+    font-weight: 700;
+    color: #88bde6;
+    margin: 0;
+    size: auto;
+    text-align: center;
+}
+
+
 .st-key-run button {
-    background-color: #8dbbe6;
+    background: linear-gradient(135deg, #89d9f9 0%, #adb5dc 100%) !important;
     color: white;
     font-size: 22px;
     font-weight: bold;
@@ -32,4 +100,14 @@
     border: none;
     cursor: pointer;
     text-align: center;  
+    margin-top: 100px;  
+    transition: all 0.3s ease !important;
+}
+
+.st-key-run button:hover {
+    color: #fff !important;
+    font-size: 16px !important;
+    transform: translateY(-2px) !important;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2) !important;
+    background: linear-gradient(135deg, #588ca0 0%, #8087ac 100%) !important; 
 }

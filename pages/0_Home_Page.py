@@ -47,6 +47,10 @@ def delete_all_quizzes():
 
 load_css()
 
+st.markdown("<h1 style='text-align: center; color: #88bde6;'>📘 BrainTap</h1>", unsafe_allow_html=True)
+
+st.markdown("---")
+
 # Create quiz popup window
 @st.dialog("Create a new quiz")
 def create_quiz_dialog():
@@ -59,36 +63,19 @@ def create_quiz_dialog():
         res = requests.post(QUIZ_CREATE_URL, json=payload)
         if res.ok:
             st.success("✅ Quiz created!")
+            st.session_state["selected_quiz_id"] = quiz["id"]
             st.session_state.create_open = False
+            st.switch_page("pages/1_Create_Quiz.py")
             st.rerun()
         else:
             st.error(f"❌ {res.text}")
 
-# First Row ---------------------------------------------------------------------------
-col1_1, col1_2, col1_3 = st.columns([1,1,1])
-
-with col1_2:
-    st.markdown("""<div id="hero-col"><h1>BrainTap</h1></div>""", unsafe_allow_html=True)
-st.html("<style>[data-testid='stHeaderActionElements'] {display: none;}</style>")
-
-
-
-# Second Row ---------------------------------------------------------------------------
-col2_1,col2_2,col2_3 = st.columns(3)
-
-# (TEST) Delets all existing quizes
-with col2_1:
-    if st.button("Delete Quizzes"):
-        deleted = delete_all_quizzes()
-        st.success(f"✅ Deleted {deleted} quizzes")
-        st.rerun()
-
 quizzes = fetch_quizzes()
 
-# Third Row ---------------------------------------------------------------------------
-col3_1, col3_2, col3_3 = st.columns([2,1,4])
+# Second Row ---------------------------------------------------------------------------
+r2c1, r2c2, r2c3 = st.columns([1,1,1])
 
-with col3_1:
+with r2c2:
 # Create Quiz button
     if st.button("Create a Quiz", key="main_quiz_button", type="primary"):
         st.session_state.create_open = True
@@ -96,20 +83,26 @@ with col3_1:
     if st.session_state.create_open:
         create_quiz_dialog()
 
-# Lists all available quizes
-with col3_3:
+
+# Third Row ---------------------------------------------------------------------------
+r3c1, r3c2, r3c3 = st.columns([0.2,3,0.2])
+
+
+
+with r2c2:
     if quizzes:
         for quiz in quizzes:
             with st.container():
                 col_a, col_b = st.columns([5, 1])
                 with col_a:
-                    st.write(f"📘 {quiz['quiz_name']}")
+                    st.write(f"{quiz['quiz_name']}")
                 with col_b:
                     if st.button("Take", key=f"take_{quiz['id']}"):
-                        st.write(f"Taking quiz: {quiz['quiz_name']}")
+                        # Save quiz id in session state
+                        st.session_state["selected_quiz_id"] = quiz["id"]
+                        # Switch to Preview page
+                        st.switch_page("pages/5_Quiz_Preview.py")
     else:
         st.info("No quizzes found yet. Create one to get started!")
 
 load_css()
-
-

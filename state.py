@@ -32,11 +32,15 @@ def save_editor_into_questions(new_slot: bool = False) -> bool:
     ss = st.session_state
     editor = ss.editing
 
-    #Read input from the editor
+    # Read input from the editor
     text = editor["text"].strip()
     choices_texts = [c.strip() for c in editor["choices"] if c.strip()]
     correct_index = editor["correct_index"]
 
+    if not text:
+        return False
+    if len(choices_texts) < 2:
+        return False
 
     # Build a Question
     q = Question(
@@ -44,6 +48,17 @@ def save_editor_into_questions(new_slot: bool = False) -> bool:
         choices=[Choice(text=c) for c in choices_texts],
         correct_index=correct_index,
     )
+
+    # Save into session_state
+    if new_slot or not ss.get("questions"):
+        ss.questions.append(q)
+        ss.cursor = len(ss.questions) - 1
+    else:
+        ss.questions[ss.cursor] = q
+
+    return True
+
+
 
 
 def delete_current_question() -> None:
@@ -57,4 +72,12 @@ def delete_current_question() -> None:
     else:
         ss.cursor = 0
         load_into_editor(None)
+
+def reset_editor():
+    st.session_state.editing = {
+        "text": "",
+        "choices": ["", "", "", ""],
+        "correct_index": 0,
+    }
+
 
