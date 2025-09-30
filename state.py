@@ -72,6 +72,15 @@ def delete_current_question() -> None:
     else:
         ss.cursor = 0
         load_into_editor(None)
+        
+def reset_editor():
+    st.session_state.editing = {
+        "text": "",
+        "choices": ["", "", "", ""],
+        "correct_index": 0,
+    }
+    st.session_state.dirty = False
+
 
 def reset_editor():
     st.session_state.editing = {
