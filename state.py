@@ -82,11 +82,3 @@ def reset_editor():
     st.session_state.dirty = False
 
 
-def reset_editor():
-    st.session_state.editing = {
-        "text": "",
-        "choices": ["", "", "", ""],
-        "correct_index": 0,
-    }
-
-

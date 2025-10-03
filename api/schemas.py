@@ -76,8 +76,11 @@ class QuizBase(BaseModel):
 
 # Används: När man tar emot nya data(quiz) via POST -> IN till API:et
 # pass <-- tomt kodblock, dvs vi lägger inte till något mer än det vi har ärvt
-class QuizCreate(QuizBase):
-    pass 
+class QuizCreate(BaseModel):
+    quiz_name:       str
+    is_active:       Optional[bool] = True  # Default to True when creating
+    number_question: int
+    creator_id:      int 
 
 # För framtida PUT/PATCH-endpoints (valfritt)
 # Används: När du tar emot ÄNDRAD data via PUT/PATCH -> IN till API:et
