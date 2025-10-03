@@ -5,10 +5,9 @@ from dotenv import load_dotenv
 
 
 # --- Session state init ---
-if "create_open" not in st.session_state:
-    st.session_state.create_open = False
-if "create_quiz_name" not in st.session_state:
-    st.session_state.create_quiz_name = ""
+ss = st.session_state
+ss.setdefault("create_open", False)
+ss.setdefault("create_quiz_name", "")
 
 
 load_dotenv()
@@ -28,44 +27,45 @@ QUIZ_CREATE_URL     = f"{API_BASE}/quizzes/quizzes/"        # POST
 QUESTION_CREATE_URL = f"{API_BASE}/quizzes/questions/"      # POST
 QUIZ_DELETE_URL     = lambda qid: f"{API_BASE}/quizzes/quizzes/{qid}/"  # DELETE
 
-# Import CSS styles
+# CSS
 def load_css():
-    with open("pages/styles/0_Home_Page.css") as f:
+    with open("pages/styles/0_Home_Page.css", encoding="utf-8") as f:
         st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
 
-if response.status_code == 200:
-    quizzes = response.json()
-else:
-    quizzes = []
-
-# Gets all available Quizes
 def fetch_quizzes():
     try:
-        r = requests.get(f"{API_BASE}/quizzes/quizzes/")  # NOTE: trailing slash
+        r = requests.get(QUIZZES_LIST_URL)  # correct endpoint
         r.raise_for_status()
-        return r.json()
+        data = r.json()
+        return data if isinstance(data, list) else []
     except Exception as e:
         st.error(f"Failed to fetch quizzes: {e}")
         return []
 
-# Deletes all available Quizes
 def delete_all_quizzes():
     quizzes = fetch_quizzes()
     deleted = 0
     for q in quizzes:
-        res = requests.delete(f"{API_BASE}/quizzes/quizzes/{q['id']}/")
+        res = requests.delete(QUIZ_DELETE_URL(q["id"]))
         if res.ok:
             deleted += 1
     return deleted
 
+def clean_quiz_name_for_display(quiz_name):
+    """Remove timestamp suffix from quiz name for display purposes"""
+    if "_" in quiz_name:
+        # Split by underscore and check if last part is a timestamp (all digits)
+        parts = quiz_name.split("_")
+        if len(parts) > 1 and parts[-1].isdigit():
+            # Remove the last part (timestamp)
+            return "_".join(parts[:-1])
+    return quiz_name
+
 
 load_css()
-
-st.markdown("<h1 style='text-align: center; color: #88bde6;'>📘 BrainTap</h1>", unsafe_allow_html=True)
-
+clickable_logo()
 st.markdown("---")
 
-# Create quiz popup window
 @st.dialog("Create a new quiz")
 def create_quiz_dialog():
     name = st.text_input("Quiz name", key="create_quiz_name")
@@ -73,50 +73,45 @@ def create_quiz_dialog():
         if not name.strip():
             st.warning("Please enter a name.")
             return
-        payload = {"quiz_name": name.strip(), "number_question": 0, "creator_id": 0}
-        res = requests.post(QUIZ_CREATE_URL, json=payload)
-        if res.ok:
-            st.success("✅ Quiz created!")
-            st.session_state["selected_quiz_id"] = quiz["id"]
-            st.session_state.create_open = False
-            st.switch_page("pages/1_Create_Quiz.py")
-            st.rerun()
-        else:
-            st.error(f"❌ {res.text}")
+        
+        # Store the quiz name for later use, don't create quiz yet
+        st.session_state["new_quiz_name"] = name.strip()
+        st.session_state["selected_quiz_id"] = None  # No existing quiz
+        st.session_state.create_open = False
+        st.success("✅ Ready to create quiz!")
+        st.switch_page("pages/1_Create_Quiz.py")
 
-quizzes = fetch_quizzes()
-
-# Second Row ---------------------------------------------------------------------------
-r2c1, r2c2, r2c3 = st.columns([1,1,1])
-
-with r2c2:
-# Create Quiz button
-    if st.button("Create a Quiz", key="main_quiz_button", type="primary"):
+# Centered Create Quiz button
+col1, col2, col3 = st.columns([1, 2, 1])
+with col2:
+    if st.button("Create a Quiz", key="main_quiz_button", type="primary", use_container_width=True):
         st.session_state.create_open = True
+        st.rerun()  # Rerun to show the dialog immediately
 
-    if st.session_state.create_open:
-        create_quiz_dialog()
+# Show dialog only if create_open is True
+if st.session_state.create_open:
+    create_quiz_dialog()
 
-
-# Third Row ---------------------------------------------------------------------------
-r3c1, r3c2, r3c3 = st.columns([0.2,3,0.2])
-
-
-
-with r2c2:
+# List quizzes
+quizzes = fetch_quizzes()
+c1, c2, c3 = st.columns([0.2, 3, 0.2])
+with c2:
     if quizzes:
+        st.subheader("Available Quizzes")
         for quiz in quizzes:
-            with st.container():
-                col_a, col_b = st.columns([5, 1])
-                with col_a:
-                    st.write(f"{quiz['quiz_name']}")
-                with col_b:
-                    if st.button("Take", key=f"take_{quiz['id']}"):
-                        # Save quiz id in session state
-                        st.session_state["selected_quiz_id"] = quiz["id"]
-                        # Switch to Preview page
-                        st.switch_page("pages/5_Quiz_Preview.py")
+            raw_title = quiz.get("quiz_name", "Untitled Quiz")
+            clean_title = clean_quiz_name_for_display(raw_title)
+            qid = quiz.get("id")
+            col_a, col_b, col_c = st.columns([4, 1, 1])
+            with col_a:
+                st.write(f"• {clean_title}")
+            with col_b:
+                if qid is not None and st.button("Edit", key=f"edit_{qid}"):
+                    st.session_state["selected_quiz_id"] = qid
+                    st.switch_page("pages/1_Create_Quiz.py")
+            with col_c:
+                if qid is not None and st.button("Take", key=f"take_{qid}"):
+                    st.session_state["selected_quiz_id"] = qid
+                    st.switch_page("pages/5_Quiz_Preview.py")
     else:
-        st.info("No quizzes found yet. Create one to get started!")
-
-load_css()
+        st.info("No quizzes. Create one to get started!")
