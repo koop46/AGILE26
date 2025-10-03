@@ -1,5 +1,8 @@
-import streamlit as st
+import os
 import requests
+import streamlit as st
+from dotenv import load_dotenv
+
 
 # --- Session state init ---
 if "create_open" not in st.session_state:
@@ -7,7 +10,18 @@ if "create_open" not in st.session_state:
 if "create_quiz_name" not in st.session_state:
     st.session_state.create_quiz_name = ""
 
-API_BASE = "http://localhost:8000"  # FastAPI base URL
+
+load_dotenv()
+
+PRODUCTION = os.getenv("PRODUCTION")
+
+if PRODUCTION == True:
+    API_BASE = "http://api:8000"
+else:
+    API_BASE = "http://localhost:8000"
+
+
+#API_BASE = "http://localhost:8000"  # FastAPI base URL
 response = requests.get("http://localhost:8000/quizzes")  # <-- FIXED
 QUIZZES_LIST_URL    = f"{API_BASE}/quizzes/quizzes/"        # GET
 QUIZ_CREATE_URL     = f"{API_BASE}/quizzes/quizzes/"        # POST
