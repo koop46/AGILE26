@@ -120,8 +120,8 @@ class QuizResultResponse(QuizResultBase):
 
 # ---------- Submissions / Results ----------
 class SubmissionRequest(BaseModel):
-            pre_test:   dict
-            post_test:  dict
+            pre_test:   dict[str, list[int]]
+            post_test:  dict[str, list[int]]
 
 class SubmissionResponse(BaseModel):
             n_users:            int
