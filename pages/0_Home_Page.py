@@ -2,7 +2,10 @@ import os
 import requests
 import streamlit as st
 from dotenv import load_dotenv
+import sys
 
+sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
+from pages.styles.logo import clickable_logo
 
 # --- Session state init ---
 ss = st.session_state
