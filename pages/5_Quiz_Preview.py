@@ -1,10 +1,14 @@
 import streamlit as st
 import pathlib
 import requests
+import sys
+import os
+sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
+from pages.styles.logo import clickable_logo
 
 API_BASE = "http://localhost:8000"
 
-QUIZ_DETAIL_URL = lambda qid: f"{API_BASE}/quizzes/quizzes/{qid}"  # try without trailing slash first
+QUIZ_DETAIL_URL = lambda qid: f"{API_BASE}/quizzes/{qid}"  # Correct API endpoint
 
 
 quiz_id = st.session_state.get("selected_quiz_id")
@@ -13,20 +17,15 @@ st.set_page_config(page_title="Quiz Preview", layout="centered")
 
 ss = st.session_state
 
-quiz = [
-    ("What is the capital of France?", ("Paris", "London", "Berlin", "Rome"), 0),
-]
+# Initialize editing state if not exists
 if "editing" not in ss:
-    q, opts, rid = quiz[0]
-    ss.editing = {"text": q, "choices": list(opts), "correct_index": rid}
+    ss.editing = {"text": "", "choices": ["", "", "", ""], "correct_index": 0}
     ss.dirty = False
-
-e = ss.editing
 
 
 def delete_quiz(quiz_id: int):
     try:
-        res = requests.delete(f"{API_BASE}/quizzes/quizzes/{quiz_id}/")
+        res = requests.delete(f"{API_BASE}/quizzes/{quiz_id}")
         if res.ok:
             return True
         else:
@@ -46,46 +45,58 @@ css_path = pathlib.Path("pages/styles/5_Preview.css")
 load_css(css_path)
 
 
-st.markdown("<h1 style='text-align: center; color: #88bde6;'>📘 BrainTap</h1>", unsafe_allow_html=True)
-
+clickable_logo()
 st.markdown("---")
 
 r1c1, r1c2, r1c3 = st.columns([0.2, 1, 0.2])
 
 with r1c2:
     if quiz_id:
-        r = requests.get(f"{API_BASE}/quizzes/quizzes/{quiz_id}")
-        if r.ok:
-            quiz_data = r.json()
-            st.markdown(
-                f"""
-                <div class="quiz-preview-box">
-                    <h2 class="quiz-title">{quiz_data.get('quiz_name', 'Untitled Quiz')}</h2>
-                </div>
-                """,
-                unsafe_allow_html=True
-            )
+        try:
+            r = requests.get(f"{API_BASE}/quizzes/{quiz_id}")
+            if r.ok:
+                quiz_data = r.json()
+                # Clean quiz name for display
+                raw_quiz_name = quiz_data.get('quiz_name', 'Untitled Quiz')
+                if "_" in raw_quiz_name and raw_quiz_name.split("_")[-1].isdigit():
+                    clean_quiz_name = "_".join(raw_quiz_name.split("_")[:-1])
+                else:
+                    clean_quiz_name = raw_quiz_name
+                
+                st.markdown(
+                    f"""
+                    <div class="quiz-preview-box">
+                        <h2 class="quiz-title">{clean_quiz_name}</h2>
+                    </div>
+                    """,
+                    unsafe_allow_html=True
+                )
 
-            # --- first question ---
-            questions = quiz_data.get("questions", [])
-            if questions:
-                first_q = questions[0]
-                q_text = first_q.get("text") or first_q.get("question") or ""
-                choices = first_q.get("choices") or []
-                correct_index = first_q.get("correct_index", 0)
+                # --- first question ---
+                questions = quiz_data.get("questions", [])
+                if questions:
+                    first_q = questions[0]
+                    # Use correct field names from the Question model
+                    q_text = first_q.get("question_text", "")
+                    choices = [
+                        first_q.get("choice_1", ""),
+                        first_q.get("choice_2", ""),
+                        first_q.get("choice_3", ""),
+                        first_q.get("choice_4", "")
+                    ]
+                    correct_index = first_q.get("answer", 0)
 
-                # normalize choices to length 4
-                choices = list(choices)[:4] + [""] * max(0, 4 - len(choices))
-
-                st.session_state.editing = {
-                    "text": q_text,
-                    "choices": choices,
-                    "correct_index": int(correct_index)
-                }
+                    st.session_state.editing = {
+                        "text": q_text,
+                        "choices": choices,
+                        "correct_index": int(correct_index)
+                    }
+                else:
+                    st.warning("This quiz has no questions.")
             else:
-                st.warning("This quiz has no questions.")
-        else:
-            st.error("Quiz not found")
+                st.error(f"Quiz not found: {r.status_code} - {r.text}")
+        except Exception as e:
+            st.error(f"Error loading quiz: {e}")
     else:
         st.warning("No quiz selected. Go back and pick one.")
 

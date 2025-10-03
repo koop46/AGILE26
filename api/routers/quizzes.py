@@ -1,8 +1,8 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from database import get_db
-from models import Quiz
-from schemas import QuizCreate, QuizResponse, QuizUpdate
+from models import Quiz, Question
+from schemas import QuizCreate, QuizResponse, QuizUpdate, QnaBase
 from typing import List
 
 
@@ -19,7 +19,12 @@ router = APIRouter(tags=["Quizzes"])
 #för POST/quizzes --> Skapa nytt quiz
 @router.post("/", response_model=QuizResponse)
 def create_quiz(quiz: QuizCreate, db: Session = Depends(get_db)):    
-    db_quiz = Quiz(**quiz.dict()) # <-- Vrf överstreckad?
+    # Filter out any fields that don't belong in the Quiz model
+    quiz_data = quiz.dict()
+    # Remove questions field if it exists (it's handled separately)
+    quiz_data.pop('questions', None)
+    
+    db_quiz = Quiz(**quiz_data)
     db.add(db_quiz)
     db.commit()
     db.refresh(db_quiz)
@@ -65,5 +70,44 @@ def delete_quiz(quiz_id: int, db: Session = Depends(get_db)):
     db.delete(quiz)
     db.commit()
     return {"detail": "Quiz deleted"}
+
+
+#för POST /quizzes/{quiz_id}/questions –-> Lägg till fråga till quiz
+@router.post("/{quiz_id}/questions")
+def add_question_to_quiz(quiz_id: int, question: QnaBase, db: Session = Depends(get_db)):
+    # Check if quiz exists
+    quiz = db.query(Quiz).filter(Quiz.id == quiz_id).first()
+    if not quiz:
+        raise HTTPException(status_code=404, detail="Quiz not found")
+    
+    # Create new question
+    db_question = Question(
+        quiz_id=quiz_id,
+        question_text=question.question_text,
+        choice_1=question.choice_1,
+        choice_2=question.choice_2,
+        choice_3=question.choice_3,
+        choice_4=question.choice_4,
+        answer=question.answer
+    )
+    
+    db.add(db_question)
+    db.commit()
+    db.refresh(db_question)
+    
+    return {"detail": "Question added successfully", "question_id": db_question.qna_id}
+
+@router.delete("/{quiz_id}/questions")
+def delete_quiz_questions(quiz_id: int, db: Session = Depends(get_db)):
+    """Delete all questions for a specific quiz"""
+    quiz = db.query(Quiz).filter(Quiz.id == quiz_id).first()
+    if not quiz:
+        raise HTTPException(status_code=404, detail="Quiz not found")
+    
+    # Delete all questions for this quiz
+    db.query(Question).filter(Question.quiz_id == quiz_id).delete()
+    db.commit()
+    
+    return {"detail": "All questions deleted successfully"}
 
 
