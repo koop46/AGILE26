@@ -1,24 +1,31 @@
-import streamlit as st
-import requests
-import sys
 import os
-sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
-from pages.styles.logo import clickable_logo
+import requests
+import streamlit as st
+from dotenv import load_dotenv
 
-API_BASE = "http://localhost:8000"
-QUIZZES_LIST_URL  = f"{API_BASE}/quizzes/"                       # GET list
-QUIZ_CREATE_URL   = f"{API_BASE}/quizzes/"                       # POST create
-QUIZ_DETAIL_URL   = lambda qid: f"{API_BASE}/quizzes/{qid}"      # GET detail
-QUIZ_DELETE_URL   = lambda qid: f"{API_BASE}/quizzes/{qid}"      # DELETE
 
 # --- Session state init ---
 ss = st.session_state
 ss.setdefault("create_open", False)
 ss.setdefault("create_quiz_name", "")
 
-# Ensure create_open is False when page loads (unless explicitly set)
-if "create_open" not in ss:
-    ss.create_open = False
+
+load_dotenv()
+
+PRODUCTION = os.getenv("PRODUCTION")
+
+if PRODUCTION == True:
+    API_BASE = "http://api:8000"
+else:
+    API_BASE = "http://localhost:8000"
+
+
+#API_BASE = "http://localhost:8000"  # FastAPI base URL
+response = requests.get("http://localhost:8000/quizzes")  # <-- FIXED
+QUIZZES_LIST_URL    = f"{API_BASE}/quizzes/quizzes/"        # GET
+QUIZ_CREATE_URL     = f"{API_BASE}/quizzes/quizzes/"        # POST
+QUESTION_CREATE_URL = f"{API_BASE}/quizzes/questions/"      # POST
+QUIZ_DELETE_URL     = lambda qid: f"{API_BASE}/quizzes/quizzes/{qid}/"  # DELETE
 
 # CSS
 def load_css():

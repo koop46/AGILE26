@@ -1,14 +1,5 @@
-# Ignore SQLite database files
-*.db
+*__pycache__
 app.db
-
-# Ignore Python cache
-__pycache__/
-*.py[cod]
-
-# Ignore virtual environment folders
-venv/
-env/
-
-api/__pycache__/
-AGILE26/api/routers/__pycache__
+*.pyc 
+.venv
+.env
