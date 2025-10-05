@@ -1,17 +1,16 @@
+from rel.crud_operations import ResourceClient
+from pages.styles.logo import clickable_logo
+from state import init_state,reset_editor
 from __future__ import annotations
 from pathlib import Path
-import requests
+from app import API_BASE
 import streamlit as st
+import requests
 import sys
 import os
-sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
-from pages.styles.logo import clickable_logo
-from state import (
-    init_state,
-    reset_editor,
-)
 
-API_BASE = "http://localhost:8000"
+sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
+quiz_table = ResourceClient(base_url=API_BASE, endpoint_path="/quizzes/")
 quiz_id = st.session_state.get("selected_quiz_id")
 
 ss = st.session_state
@@ -23,16 +22,6 @@ if "cursor" not in ss:
     ss.cursor = 0
 if "refresh_widgets" not in ss:
     ss.refresh_widgets = True  # force first-time widget init
-
-
-def fetch_quiz_with_questions(quiz_id: int):
-    try:
-        r = requests.get(f"{API_BASE}/quizzes/{quiz_id}")
-        r.raise_for_status()
-        return r.json()
-    except Exception as e:
-        st.error(f"Failed to fetch quiz {quiz_id}: {e}")
-        return None
 
 
 st.set_page_config(page_title="Create Quiz – Add Questions", layout="wide")
@@ -148,7 +137,7 @@ def page_add_questions():
                 
                 # Check if we're editing an existing quiz or creating a new one
                 quiz_id = ss.get("selected_quiz_id")
-                
+
                 if quiz_id:
                     # EDITING EXISTING QUIZ - Update it
                     quiz_name = ss.get("quiz_name", "Untitled Quiz")
@@ -157,17 +146,15 @@ def page_add_questions():
                         "number_question": len(ss.quiz_tuples),
                         "creator_id": ss.get("creator_id", 1),
                     }
-                    
+
                     try:
-                        # Update the existing quiz
-                        r = requests.put(f"{API_BASE}/quizzes/{quiz_id}", json=quiz_payload)
-                        r.raise_for_status()
-                        quiz_data = r.json()
+                        quiz_table.update(quiz_id, quiz_payload)
                         new_quiz_id = quiz_id  # Use existing ID
-                        
+
                         # Delete existing questions first
+                        # question_table.delete(quiz_id)
                         requests.delete(f"{API_BASE}/quizzes/{quiz_id}/questions")
-                        
+
                     except requests.exceptions.RequestException as e:
                         st.error(f"❌ Failed to update quiz: {e}")
                         return
@@ -181,15 +168,13 @@ def page_add_questions():
                     
                     quiz_payload = {
                         "quiz_name": unique_name,
+                        "is_active": 1,
                         "number_question": len(ss.quiz_tuples),
                         "creator_id": ss.get("creator_id", 1),
                     }
                     
                     try:
-                        # Create the quiz
-                        r = requests.post(f"{API_BASE}/quizzes/", json=quiz_payload)
-                        r.raise_for_status()
-                        quiz_data = r.json()
+                        quiz_data = quiz_table.create(quiz_payload)
                         new_quiz_id = quiz_data["id"]
                         
                     except requests.exceptions.RequestException as e:
@@ -197,6 +182,7 @@ def page_add_questions():
                         return
                 
                 try:
+                    question_table = ResourceClient(base_url=API_BASE, endpoint_path=f"quizzes/{new_quiz_id}/questions")
 
                     # Add all questions
                     questions_added = 0
@@ -209,8 +195,7 @@ def page_add_questions():
                             "choice_4": choices[3],
                             "answer": correct_idx,
                         }
-                        rq = requests.post(f"{API_BASE}/quizzes/{new_quiz_id}/questions", json=question_payload)
-                        rq.raise_for_status()
+                        question_table.create(question_payload)
                         questions_added += 1
 
                     # Success - clear state and reset
@@ -300,13 +285,17 @@ def page_add_questions():
                     ss.refresh_widgets = True
                     st.rerun()
 
+# ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  
+# ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  
+# ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  
+
 
 # Init + optional preload from backend
 init_state()
 
 # Load existing quiz data if editing
 if quiz_id and "quiz_loaded" not in st.session_state:
-    quiz_data = fetch_quiz_with_questions(quiz_id)
+    quiz_data = quiz_table.get_one(quiz_id)
     if quiz_data:
         st.session_state.quiz_name = quiz_data.get("quiz_name", "Untitled Quiz")
         st.session_state.creator_id = quiz_data.get("creator_id", 1)

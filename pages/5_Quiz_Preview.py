@@ -1,21 +1,17 @@
+from rel.crud_operations import ResourceClient
+from pages.styles.logo import clickable_logo
+from app import API_BASE
 import streamlit as st
 import pathlib
-import requests
 import sys
 import os
+
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
-from pages.styles.logo import clickable_logo
-
-API_BASE = "http://localhost:8000"
-
-QUIZ_DETAIL_URL = lambda qid: f"{API_BASE}/quizzes/{qid}"  # Correct API endpoint
-
-
+quiz_table = ResourceClient(base_url=API_BASE, endpoint_path="/quizzes/")
 quiz_id = st.session_state.get("selected_quiz_id")
-
 st.set_page_config(page_title="Quiz Preview", layout="centered")
-
 ss = st.session_state
+
 
 # Initialize editing state if not exists
 if "editing" not in ss:
@@ -23,22 +19,16 @@ if "editing" not in ss:
     ss.dirty = False
 
 
-def delete_quiz(quiz_id: int):
-    try:
-        res = requests.delete(f"{API_BASE}/quizzes/{quiz_id}")
-        if res.ok:
-            return True
-        else:
-            st.error(f"Failed to delete quiz: {res.status_code} — {res.text}")
-            return False
-    except Exception as e:
-        st.error(f"Error deleting quiz: {e}")
-        return False
-
 # Function to load CSS from the 'pages' folder
 def load_css(file_path):
     with open(file_path) as f:
         st.html(f"<style>{f.read()}</style>")
+
+
+# ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  
+# ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  
+# ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  
+
 
 # Load the external CSS
 css_path = pathlib.Path("pages/styles/5_Preview.css")
@@ -53,48 +43,46 @@ r1c1, r1c2, r1c3 = st.columns([0.2, 1, 0.2])
 with r1c2:
     if quiz_id:
         try:
-            r = requests.get(f"{API_BASE}/quizzes/{quiz_id}")
-            if r.ok:
-                quiz_data = r.json()
-                # Clean quiz name for display
-                raw_quiz_name = quiz_data.get('quiz_name', 'Untitled Quiz')
-                if "_" in raw_quiz_name and raw_quiz_name.split("_")[-1].isdigit():
-                    clean_quiz_name = "_".join(raw_quiz_name.split("_")[:-1])
-                else:
-                    clean_quiz_name = raw_quiz_name
-                
-                st.markdown(
-                    f"""
-                    <div class="quiz-preview-box">
-                        <h2 class="quiz-title">{clean_quiz_name}</h2>
-                    </div>
-                    """,
-                    unsafe_allow_html=True
-                )
-
-                # --- first question ---
-                questions = quiz_data.get("questions", [])
-                if questions:
-                    first_q = questions[0]
-                    # Use correct field names from the Question model
-                    q_text = first_q.get("question_text", "")
-                    choices = [
-                        first_q.get("choice_1", ""),
-                        first_q.get("choice_2", ""),
-                        first_q.get("choice_3", ""),
-                        first_q.get("choice_4", "")
-                    ]
-                    correct_index = first_q.get("answer", 0)
-
-                    st.session_state.editing = {
-                        "text": q_text,
-                        "choices": choices,
-                        "correct_index": int(correct_index)
-                    }
-                else:
-                    st.warning("This quiz has no questions.")
+            quiz_data = quiz_table.get_one(quiz_id)
+                         
+            # Clean quiz name for display
+            raw_quiz_name = quiz_data.get('quiz_name', 'Untitled Quiz')
+            if "_" in raw_quiz_name and raw_quiz_name.split("_")[-1].isdigit():
+                clean_quiz_name = "_".join(raw_quiz_name.split("_")[:-1])
             else:
-                st.error(f"Quiz not found: {r.status_code} - {r.text}")
+                clean_quiz_name = raw_quiz_name
+            
+            st.markdown(
+                f"""
+                <div class="quiz-preview-box">
+                    <h2 class="quiz-title">{clean_quiz_name}</h2>
+                </div>
+                """,
+                unsafe_allow_html=True
+            )
+
+            # --- first question ---
+            questions = quiz_data.get("questions", [])
+            if questions:
+                first_q = questions[0]
+                # Use correct field names from the Question model
+                q_text = first_q.get("question_text", "")
+                choices = [
+                    first_q.get("choice_1", ""),
+                    first_q.get("choice_2", ""),
+                    first_q.get("choice_3", ""),
+                    first_q.get("choice_4", "")
+                ]
+                correct_index = first_q.get("answer", 0)
+
+                st.session_state.editing = {
+                    "text": q_text,
+                    "choices": choices,
+                    "correct_index": int(correct_index)
+                }
+            else:
+                st.warning("This quiz has no questions.")
+        
         except Exception as e:
             st.error(f"Error loading quiz: {e}")
     else:
@@ -135,15 +123,12 @@ if "editing" in st.session_state:
     with r4c2: show_choice(3, "Choice 4")
 
 
-
-
-
 r5c1, r5c2, r5c3 = st.columns([1, 1, 1])
 
 with r5c1:
     if st.button("Remove", key="remove"):
         if quiz_id:
-            if delete_quiz(quiz_id):
+            if quiz_table.delete(quiz_id):
                 st.success("✅ Quiz deleted!")
                 # Clear state so preview doesn't keep stale ID
                 st.session_state.pop("selected_quiz_id", None)
