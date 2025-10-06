@@ -1,10 +1,31 @@
 import streamlit as st
 import sys
 import os
+from dotenv import load_dotenv
+
+current_dir = os.path.dirname(os.path.abspath(__file__))
+parent_dir = os.path.dirname(current_dir)
+dotenv_path = os.path.join(current_dir, 'api', '.env')
+
+load_dotenv(dotenv_path=dotenv_path)
+
+PRODUCTION = os.getenv("PRODUCTION")
+
+if PRODUCTION == "True":
+    API_BASE = "http://api:8000"
+else:
+    API_BASE = "http://localhost:8000"
+
+print(API_BASE)
+print(PRODUCTION)
+
 
 # Add the current directory to the Python path
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 from pages.styles.logo import clickable_logo
+
+
+
 
 # Page configuration
 st.set_page_config(

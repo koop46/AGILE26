@@ -6,13 +6,22 @@ from security import get_password_hash
 from sqlalchemy.orm import Session
 import os
 from routers import users, quizzes, submissions
+from dotenv import load_dotenv
 
+load_dotenv()
 
 # Load environment variables with development defaults
 ADMIN_USERNAME = os.getenv("ADMIN_USERNAME", "dev_admin")
 ADMIN_EMAIL = os.getenv("ADMIN_EMAIL", "dev_admin@example.com")
 ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD", "dev_password")
-PRODUCTION = os.getenv("PRODUCTION", "false").lower() == "true"
+PRODUCTION = os.getenv("PRODUCTION")
+
+if PRODUCTION == "True":
+    API_BASE = "http://api:8000"
+else:
+    API_BASE = "http://localhost:8000"
+
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -54,3 +63,28 @@ app.include_router(submissions.router, prefix='/submissions')
 @app.get("/")
 def health_check():
     return {"status": "healthy", "project": "API"}
+
+@app.get("/mode")
+def prod_or_dev():
+    return PRODUCTION
+
+
+# Quizzes endpoint
+
+# post   http://localhost:8000/quizzes/          <--- create quiz
+# get    http://localhost:8000/quizzes/          <--- get all
+# get    http://localhost:8000/quizzes/{quiz_id} <--- get one quiz
+# put    http://localhost:8000/quizzes/{quiz_id} <--- update one
+# delete http://localhost:8000/quizzes/{quiz_id} <--- delete one
+
+
+# Users endpoint
+
+# post   http://localhost:8000/users/          <--- create user
+# get    http://localhost:8000/users/          <--- get user
+# get    http://localhost:8000/users/{quiz_id} <--- get one user
+# put    http://localhost:8000/users/{quiz_id} <--- update one
+# delete http://localhost:8000/users/{quiz_id} <--- delete one
+
+# Submissions endpoint
+# post   http://localhost:8000/users/          <--- Submit answers

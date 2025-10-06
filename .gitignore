@@ -2,4 +2,4 @@
 app.db
 *.pyc 
 .venv
-.env
+*.env
