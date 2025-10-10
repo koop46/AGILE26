@@ -4,15 +4,14 @@ from pages.styles.logo import clickable_logo
 from pages.styles.logo import clickable_logo, load_css as load_logo_css
 from state import init_state,reset_editor
 from pathlib import Path
-from unicodedata import name
-import requests
+from app import API_BASE
 import streamlit as st
-from state import (
-    init_state,
-    reset_editor,
-)
+import requests
+import sys
+import os
 
-API_BASE = "http://localhost:8000"
+sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
+quiz_table = ResourceClient(base_url=API_BASE, endpoint_path="/quizzes/")
 quiz_id = st.session_state.get("selected_quiz_id")
 
 ss = st.session_state
@@ -105,6 +104,7 @@ def page_add_questions():
         reset_editor()
         ss.refresh_widgets = True
 
+    # If flagged, push ss.editing into widgets so the form reflects the model
     if ss.refresh_widgets:
         set_widgets_from_editing()
         ss.refresh_widgets = False
@@ -113,24 +113,26 @@ def page_add_questions():
 
     with main:
         st.markdown('<div class="question-header">WRITE YOUR QUESTION</div>', unsafe_allow_html=True)
-        st.text_area("", key="editing_text", height=120, placeholder="Type your question here…")
-        st.radio("", options=[0, 1, 2, 3], key="editing_correct_index", horizontal=True)
+
+        # Bind widgets ONLY via keys (no value=/index= so we can programmatically set via st.session_state)
+        st.text_area("Question Text", key="editing_text", height=120, placeholder="Type your question here…")
+        st.radio("Correct Answer", options=[0, 1, 2, 3], key="editing_correct_index", horizontal=True)
 
         r1c1, r1c2 = st.columns(2, gap="large")
         with r1c1:
-            st.text_input("", key="choice0", placeholder="Choice 1")
+            st.text_input("Choice 1", key="choice0", placeholder="Enter first choice")
         with r1c2:
-            st.text_input("", key="choice1", placeholder="Choice 2")
+            st.text_input("Choice 2", key="choice1", placeholder="Enter second choice")
 
         r2c1, r2c2 = st.columns(2, gap="large")
         with r2c1:
-            st.text_input("", key="choice2", placeholder="Choice 3")
+            st.text_input("Choice 3", key="choice2", placeholder="Enter third choice")
         with r2c2:
-            st.text_input("", key="choice3", placeholder="Choice 4")
+            st.text_input("Choice 4", key="choice3", placeholder="Enter fourth choice")
 
     col_left, col_right = st.columns([1.2, 0.2])
 
-    #  PUBLISH QUIZ 
+    # PUBLISH
     with col_left:
         # Check if we're already publishing to prevent double-clicks
         if "publishing" not in ss:
@@ -158,47 +160,84 @@ def page_add_questions():
         if st.button("PUBLISH QUIZ", disabled=ss.publishing, type=button_type):
             if len(ss.quiz_tuples) < 1:
                 st.error("You must add at least 1 question before publishing.")
+            elif ss.publishing:
+                st.warning("Please wait, quiz is being published...")
+            elif ss.last_published_quiz == ss.quiz_tuples:
+                st.warning("⚠️ This quiz was already published. Add more questions or make changes before publishing again.")
             else:
-                quiz_payload = {
-                    "quiz_name": ss.get("quiz_name", "Untitled Quiz"),
-                    "number_question": len(ss.quiz_tuples),
-                    "creator_id": 1,
-                    "is_active": True
-                }
+                # Set publishing state to prevent double-clicks
+                import time
+                ss.publishing = True
+                ss.publish_start_time = time.time()
+                st.info("🔄 Publishing quiz... Please wait.")
+                
+                # Check if we're editing an existing quiz or creating a new one
+                quiz_id = ss.get("selected_quiz_id")
 
+                if quiz_id:
+                    # EDITING EXISTING QUIZ - Update it
+                    quiz_name = ss.get("quiz_name", "Untitled Quiz")
+                    quiz_payload = {
+                        "quiz_name": quiz_name,
+                        "number_question": len(ss.quiz_tuples),
+                        "creator_id": ss.get("creator_id", 1),
+                    }
+
+                    try:
+                        quiz_table.update(quiz_id, quiz_payload)
+                        new_quiz_id = quiz_id  # Use existing ID
+
+                        # Delete existing questions first
+                        # question_table.delete(quiz_id)
+                        requests.delete(f"{API_BASE}/quizzes/{quiz_id}/questions")
+
+                    except requests.exceptions.RequestException as e:
+                        st.error(f"❌ Failed to update quiz: {e}")
+                        return
+                        
+                else:
+                    # CREATING NEW QUIZ
+                    base_name = ss.get("new_quiz_name") or ss.get("quiz_name", "Untitled Quiz")
+                    if "quiz_creation_id" not in ss:
+                        ss.quiz_creation_id = int(time.time() * 1000)  # milliseconds for uniqueness
+                    unique_name = f"{base_name}_{ss.quiz_creation_id}"
+                    
+                    quiz_payload = {
+                        "quiz_name": unique_name,
+                        "is_active": 1,
+                        "number_question": len(ss.quiz_tuples),
+                        "creator_id": ss.get("creator_id", 1),
+                    }
+                    
+                    try:
+                        quiz_data = quiz_table.create(quiz_payload)
+                        new_quiz_id = quiz_data["id"]
+                        
+                    except requests.exceptions.RequestException as e:
+                        st.error(f"❌ Failed to create quiz: {e}")
+                        return
+                
                 try:
-                    # whether to create or update quiz
-                    if quiz_id:
-                        r = requests.put(f"{API_BASE}/quizzes/{quiz_id}", json=quiz_payload)
-                    else:
-                        # Create new quiz
-                        r = requests.post(f"{API_BASE}/quizzes/", json=quiz_payload)
+                    question_table = ResourceClient(base_url=API_BASE, endpoint_path=f"quizzes/{new_quiz_id}/questions")
 
-                    r.raise_for_status()
-                    quiz_data = r.json()
-                    new_quiz_id = quiz_data["id"]
-
-                    if quiz_id:
-                        existing_qs = fetch_quiz_with_questions(quiz_id).get("questions", [])
-                    else:
-                        existing_qs = []
-
-                    existing_texts = {q["question_text"] for q in existing_qs}
+                    # Add all questions
+                    questions_added = 0
                     for (qtext, choices, correct_idx) in ss.quiz_tuples:
-                        if qtext not in existing_texts:
-                            question_payload = {
-                                "question_text": qtext,
-                                "choice_1": choices[0],
-                                "choice_2": choices[1],
-                                "choice_3": choices[2],
-                                "choice_4": choices[3],
-                                "answer": correct_idx
-                            }
-                            requests.post(f"{API_BASE}/quizzes/{new_quiz_id}/questions", json=question_payload)
+                        question_payload = {
+                            "question_text": qtext,
+                            "choice_1": choices[0],
+                            "choice_2": choices[1],
+                            "choice_3": choices[2],
+                            "choice_4": choices[3],
+                            "answer": correct_idx,
+                        }
+                        question_table.create(question_payload)
+                        questions_added += 1
 
-                    st.success(f" Quiz published successfully! ID: {new_quiz_id}")
-                    st.cache_data.clear()
-                   
+                    # Success - clear state and reset
+                    action = "updated" if quiz_id else "created"
+                    st.success(f"✅ Quiz {action} successfully! ID: {new_quiz_id} ({questions_added} questions)")
+                    ss.last_published_quiz = ss.quiz_tuples.copy()  # Track what was published
                     ss.quiz_tuples = []
                     ss.publishing = False
                     ss.publish_start_time = None
@@ -211,35 +250,33 @@ def page_add_questions():
                     ss.refresh_widgets = True
                     st.switch_page("pages/0_Home_Page.py")
 
+                except requests.exceptions.RequestException as e:
+                    ss.publishing = False
+                    ss.publish_start_time = None
+                    st.error(f"❌ Network error: {e}")
                 except Exception as e:
-                    detail = ""
-                    if hasattr(e, "response") and e.response is not None:
-                        try:
-                            detail = e.response.json()
-                        except Exception:
-                            detail = e.response.text
-                    st.error(f"Failed to publish quiz: {e}\nDetails: {detail}")
+                    ss.publishing = False
+                    ss.publish_start_time = None
+                    st.error(f"❌ Failed to publish quiz: {e}")
 
     # ADD / UPDATE
     with col_right:
+        # Read current editor (scratchpad)
         qtext, (v0, v1, v2, v3), correct_idx = get_editor_values()
 
+        # ADD
         if not ss.is_editing:
             if st.button("ADD", type="primary"):
                 # Append a copy so editor typing won't mutate saved list
                 ss.quiz_tuples.append((qtext, tuple([v0, v1, v2, v3]), correct_idx))
+                ss.last_published_quiz = None  # Reset published tracking when adding questions
                 st.success("Question added!")
-
                 reset_editor()
-                for key in ["editing_text", "choice0", "choice1", "choice2", "choice3", "editing_correct_index"]:
-                    if key in st.session_state:
-                        del st.session_state[key]
-
                 ss.is_editing = False
                 ss.refresh_widgets = True
-                ss.fetched_quiz = True  
                 st.rerun()
 
+        # UPDATE
         if ss.is_editing:
             update_btn_type = "secondary" if editor_changed() else "primary"
             if st.button("UPDATE", type=update_btn_type):
@@ -250,14 +287,13 @@ def page_add_questions():
                 reset_editor()
                 ss.is_editing = False
                 ss.refresh_widgets = True
-                ss.fetched_quiz = True
                 st.rerun()
 
 
     total = len(ss.get("quiz_tuples", []))
     st.caption(f"Total questions: {total}")
 
-    #  SAVED QUESTIONS 
+    # SAVED QUESTIONS
     if ss.quiz_tuples:
         st.divider()
         st.header("Questions:")
@@ -265,6 +301,7 @@ def page_add_questions():
         for i, (qtext, choices, correct_idx) in enumerate(ss.quiz_tuples):
             col_q, col_edit, col_delete = st.columns([3, 1, 1])
 
+            # Show as a button to load into editor
             with col_q:
                 if st.button(f"Fråga {i+1}: {qtext}", key=f"show_q_{i}", type="tertiary"):
                     ss.editing = {"text": qtext, "choices": list(choices), "correct_index": correct_idx}
@@ -288,28 +325,25 @@ def page_add_questions():
                     reset_editor()
                     ss.is_editing = False
                     ss.refresh_widgets = True
-                    ss.fetched_quiz = True
                     st.rerun()
 
+# ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  
+# ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  
+# ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  
 
-#  INIT + LOAD EXISTING QUIZ 
+
+# Init + optional preload from backend
 init_state()
-page_add_questions()
 
-# fetch and display existing quiz questions
-if quiz_id and not ss.fetched_quiz:
-    quiz_data = fetch_quiz_with_questions(quiz_id)
+# Load existing quiz data if editing
+if quiz_id and "quiz_loaded" not in st.session_state:
+    quiz_data = quiz_table.get_one(quiz_id)
     if quiz_data:
         st.session_state.quiz_name = quiz_data.get("quiz_name", "Untitled Quiz")
         st.session_state.creator_id = quiz_data.get("creator_id", 1)
         questions = quiz_data.get("questions", [])
         st.session_state.quiz_tuples = [
-            (
-                q["question_text"],
-                (q.get("choice_1", ""), q.get("choice_2", ""), q.get("choice_3", ""), q.get("choice_4", "")),
-                q["answer"],
-            )
-            for q in questions
+            (q["question_text"], (q["choice_1"], q["choice_2"], q["choice_3"], q["choice_4"]), q["answer"]) for q in questions
         ]
         st.session_state.original_question_count = len(questions)  # Track original count
         st.session_state.quiz_loaded = True
