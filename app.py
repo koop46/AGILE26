@@ -147,7 +147,7 @@ if __name__ == "__main__":
         st.session_state["current_page"] = "home"
 
     if st.session_state["current_page"] == "create_quiz":
-        st.switch_page("pages/1_Create_Quiz.py")
+        st.switch_page("pages/0_Home_Page.py")
 
     elif st.session_state["current_page"] == "take_quiz":
         st.switch_page("pages/2_Take_Quiz.py")

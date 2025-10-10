@@ -91,13 +91,6 @@ def page_add_questions():
     clickable_logo()
     
 
-####### Obs, Josef la till en tillbaka-knapp till app-sidan här. ################
-    if st.button("⬅️ Tillbaka till app-sidan *(Tillfällig)*"):
-        st.session_state["current_page"] = "home"
-        st.switch_page("app.py")
-#################################################################################
-
-
 
     # Show quiz name if available
     quiz_name = ss.get("new_quiz_name") or ss.get("quiz_name", "New Quiz")

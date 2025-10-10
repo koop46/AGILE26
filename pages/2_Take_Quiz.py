@@ -158,14 +158,14 @@ with col_next:
 
 
 ####### La till detta tillfälligt ##########
-#def page_take_quiz():
-#    st.title("🧠 Take Quiz")
-#
+def page_take_quiz():
+    st.title("🧠 Take Quiz")
+
     # --- Tillbaka till app-sidan ---
-#    if st.button("⬅️ Tillbaka till app-sidan"):
-#        st.session_state["current_page"] = "home"
-#        st.switch_page("app.py")
+    if st.button("⬅️ Tillbaka till app-sidan"):
+        st.session_state["current_page"] = "home"
+        st.switch_page("app.py")
 
     # --- Resten av din quiz-logik här ---
-#    st.write("Här kommer quizet att visas...")
+    st.write("Här kommer quizet att visas...")
 

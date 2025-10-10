@@ -96,3 +96,12 @@ with c2:
                     st.switch_page("pages/5_Quiz_Preview.py")
     else:
         st.info("No quizzes. Create one to get started!")
+
+
+
+
+####### Obs, Josef la till en tillbaka-knapp till app-sidan här. ################
+    if st.button("⬅️ Tillbaka till app-sidan *(Tillfällig)*"):
+        st.session_state["current_page"] = "home"
+        st.switch_page("app.py")
+#################################################################################
