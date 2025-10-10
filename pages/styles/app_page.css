@@ -1,0 +1,39 @@
+/* === APP PAGE BUTTON STYLING === */
+
+/* TAKE QUIZ button */
+div.stButton > button:first-child {
+    font-size: 20px !important;
+    padding: 20px !important;
+    background: linear-gradient(135deg, #89d9f9 0%, #adb5dc 100%) !important;
+    border: 2px solid #fff !important;
+    color: white !important;
+    font-weight: bold !important;
+    border-radius: 10px !important;
+    cursor: pointer !important;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15) !important;
+    transition: all 0.3s ease !important;
+}
+div.stButton > button:first-child:hover {
+    background: linear-gradient(135deg, #588ca0 0%, #8087ac 100%) !important;
+    transform: translateY(-2px) !important;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2) !important;
+}
+
+/* CREATE QUIZ button */
+div.stButton > button:nth-child(2) {
+    font-size: 20px !important;
+    padding: 20px !important;
+    background: linear-gradient(135deg, #89d9f9 0%, #adb5dc 100%) !important;
+    border: 2px solid #fff !important;
+    color: white !important;
+    font-weight: bold !important;
+    border-radius: 10px !important;
+    cursor: pointer !important;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15) !important;
+    transition: all 0.3s ease !important;
+}
+div.stButton > button:nth-child(2):hover {
+    background: linear-gradient(135deg, #588ca0 0%, #8087ac 100%) !important;
+    transform: translateY(-2px) !important;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2) !important;
+}

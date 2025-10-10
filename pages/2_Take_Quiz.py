@@ -1,5 +1,7 @@
 import streamlit as st
 import requests
+#from rel.crud_operations import ResourceClient
+#from app import API_BASE
 
 API_BASE = "http://localhost:8000"
 
@@ -151,3 +153,19 @@ with col_next:
             # Next question
             st.session_state.current_question_index += 1
             st.rerun()
+
+
+
+
+####### La till detta tillfälligt ##########
+#def page_take_quiz():
+#    st.title("🧠 Take Quiz")
+#
+    # --- Tillbaka till app-sidan ---
+#    if st.button("⬅️ Tillbaka till app-sidan"):
+#        st.session_state["current_page"] = "home"
+#        st.switch_page("app.py")
+
+    # --- Resten av din quiz-logik här ---
+#    st.write("Här kommer quizet att visas...")
+
