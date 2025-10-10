@@ -64,7 +64,7 @@ def page_add_questions():
     clickable_logo()
     
 
-####### Obs, jag la till en tillbaka-knapp till app-sidan här. ################
+####### Obs, Josef la till en tillbaka-knapp till app-sidan här. ################
     if st.button("⬅️ Tillbaka till app-sidan *(Tillfällig)*"):
         st.session_state["current_page"] = "home"
         st.switch_page("app.py")

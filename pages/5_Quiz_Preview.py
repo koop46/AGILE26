@@ -13,6 +13,8 @@ st.set_page_config(page_title="Quiz Preview", layout="centered")
 ss = st.session_state
 
 
+
+
 # Initialize editing state if not exists
 if "editing" not in ss:
     ss.editing = {"text": "", "choices": ["", "", "", ""], "correct_index": 0}
@@ -43,6 +45,7 @@ r1c1, r1c2, r1c3 = st.columns([0.2, 1, 0.2])
 with r1c2:
     if quiz_id:
         try:
+            ### Hämtar ###
             quiz_data = quiz_table.get_one(quiz_id)
                          
             # Clean quiz name for display

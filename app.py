@@ -26,7 +26,6 @@ from pages.styles.logo import clickable_logo
 
 
 
-
 # Page configuration
 st.set_page_config(
     page_title="BrainTap Quiz App",
@@ -45,86 +44,97 @@ header {visibility: hidden;}
 """
 st.markdown(hide_streamlit_style, unsafe_allow_html=True)
 
-
-# Styling för Take quiz och Create quiz knapparna. 
-# !!OBS!! byter du färgen på en så byts båda...fattar inte varför
-st.markdown("""
-<style>
-/* TAKE QUIZ knapp */
-div.stButton > button:first-child {
-    font-size: 20px;
-    padding: 20px;
-    background-color: #4CAF50;
-    color: white;
-    border-radius: 10px;
-    border: none;
-    cursor: pointer;
-    transition: 0.2s;
-}
-div.stButton > button:first-child:hover {
-    background-color: #43A047;
-}
-
-/* CREATE QUIZ knapp */
-div.stButton > button:nth-child(2) {
-    font-size: 20px;
-    padding: 20px;
-    background-color: #2196F3;
-    color: white;
-    border-radius: 10px;
-    border: none;
-    cursor: pointer;
-    transition: 0.2s;
-}
-div.stButton > button:nth-child(2):hover {
-    background-color: #1976D2;
-}
-</style>
-""", unsafe_allow_html=True)
+### === Hämtar css filen från styles-mappen med styling för app.py-sidan. === ###
+def load_css():
+    with open("pages/styles/app_page.css", encoding="utf-8") as f:
+        st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
 
 
 
 
 
+#### === Take Quiz pop-up dialog === ####
+@st.dialog("Take a Quiz")
+def show_take_quiz_dialog():
+    # Fält för att skriva in QuizID och Username.
+    quiz_input = st.text_input("Enter Quiz ID", key="take_quiz_input")
+    username_input = st.text_input("Enter desired username", key="take_quiz_username_input")
+
+    # Flagga för att tala om ifall vi ska visa en varning
+    show_warning = False
+    
+    col1, col2 = st.columns(2)
+    with col1:
+        if st.button("Start Quiz", key="start_quiz_button", use_container_width=True):
+            # Säkerställer att båda fälten är ifyllda (.strip tar bort whitespace)
+            if not quiz_input.strip() or not username_input.strip():
+                show_warning = True
+            else:
+                # Allt OK -- Spara info och byt sida
+                # Spara användarens val i session_state
+                st.session_state["selected_quiz_id_or_name"] = quiz_input.strip()
+                st.session_state["username"] = username_input.strip()
+
+                # Stäng pop-up och navigerar till Take_Quiz-sidan
+                st.session_state.take_open = False
+                st.session_state["current_page"] = "take_quiz"
+                st.rerun()
+
+    with col2:
+        if st.button("Cancel", key="cancel_quiz_button", use_container_width=True):
+            st.session_state.take_open = False
+            st.rerun()
+
+    # Visa varningen efter layouten, så inte Cancel-knappen försvinner.
+    if show_warning:
+        st.warning("Please fill in both fields before starting a quiz.")
 
 
 
-# Main app content
+
+
+#### ==== Main app content ==== ####
 def main():
+
+    # --- Logga och text --- #
+    load_css()
     clickable_logo()
     st.markdown("""
     <div style='text-align: center; padding: 2rem;'>
         <p style='font-size: 1.2rem; color: #666; margin-bottom: 2rem;'>Welcome to your quiz application!</p>
     </div>
     """, unsafe_allow_html=True)
-    
 
     
+     # --- Initiera flaggan för pop-up --- #
+    if "take_open" not in st.session_state:
+        st.session_state.take_open = False
+
     
-
-
-    
-
-    # Create two columns for the clickable boxes (takeQuiz, createQuiz).
+    # --- Knapparna Create Quiz och Take Quiz --- #
     col1, col2 = st.columns(2)
-
     with col1:
         if st.button("📘 Take Quiz", key="take_quiz_button", use_container_width=True):
-            st.success("ska navigera till Take Quiz-sidan sen...")  # Replace with navigation logic
-
+            st.session_state.take_open = True
     with col2:
         if st.button("✏️ Create Quiz", key="create_quiz_button", use_container_width=True):
             st.session_state["current_page"] = "create_quiz"
             st.rerun()
 
-# Förklaring till koden "with col2:" ovan:
-#           När du klickar på en knapp sparas ett “tillstånd” (state) i Streamlit: st.session_state["current_page"] = "create_quiz".
-#           Sedan körs st.experimental_rerun(), vilket betyder att appen startar om sig själv direkt.           
+
+
+    # --- Visa pop-upen om flaggan är aktiv --- #
+    if st.session_state.take_open:
+        show_take_quiz_dialog()
+    
 
 
 
-    # Flyttade denna ner hit så att den ligger under TakeQuiz och CreateQuiz knapparna.
+    # --- Info-text längst ner --- #
     st.info("👈 Use the sidebar to navigate between different pages of the application.")
+
+
+
 
 
 # Förklaring till koden nedan:
