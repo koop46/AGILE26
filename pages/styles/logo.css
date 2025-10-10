@@ -1,0 +1,32 @@
+/* Style the BrainTap logo button using custom container class */
+/* Target both the wrapper and all nested button elements */
+.logo-button-container button,
+.logo-button-container button > div,
+.logo-button-container [data-testid="stButton"] button,
+.logo-button-container [class*="st-emotion-cache"] button {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+    color: white !important;
+    font-weight: bold !important;
+    font-size: 1.2rem !important;
+    border: none !important;
+    border-radius: 12px !important;
+    padding: 0.8rem 1.5rem !important;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1) !important;
+    transition: all 0.3s ease !important;
+}
+
+.logo-button-container button:hover,
+.logo-button-container [data-testid="stButton"] button:hover {
+    transform: translateY(-2px) !important;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15) !important;
+}
+
+.logo-button-container button:active {
+    transform: translateY(0) !important;
+}
+
+/* If you found a specific emotion class, you can target it here (but it may change) */
+.logo-button-container .st-emotion-cache-5qfegl {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+    color: white !important;
+}

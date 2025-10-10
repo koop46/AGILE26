@@ -1,7 +1,8 @@
+from __future__ import annotations
 from rel.crud_operations import ResourceClient
 from pages.styles.logo import clickable_logo
+from pages.styles.logo import clickable_logo, load_css as load_logo_css
 from state import init_state,reset_editor
-from __future__ import annotations
 from pathlib import Path
 from app import API_BASE
 import streamlit as st
@@ -22,6 +23,32 @@ if "cursor" not in ss:
     ss.cursor = 0
 if "refresh_widgets" not in ss:
     ss.refresh_widgets = True  # force first-time widget init
+
+               
+# Change button type based on edit mode and question count
+# If in edit mode and number of questions unchanged -> primary, otherwise secondary
+# But can't be secondary if there are no questions
+is_edit_mode = ss.get("selected_quiz_id") is not None
+original_count = ss.get("original_question_count", 0)
+current_count = len(ss.quiz_tuples)
+
+def editor_changed() -> bool:
+    if not ss.get("is_editing"):
+        return False
+    qtext, (v0, v1, v2, v3), correct_idx = get_editor_values()
+    orig = ss.get("editing", {})
+    orig_text = orig.get("text", "")
+    orig_idx = orig.get("correct_index", 0)
+    # pad/crop to 4 choices
+    orig_choices = list(orig.get("choices", ["", "", "", ""]))[:4]
+    while len(orig_choices) < 4:
+        orig_choices.append("")
+    return (
+        qtext != orig_text
+        or correct_idx != orig_idx
+        or [v0, v1, v2, v3] != orig_choices
+    )
+
 
 
 st.set_page_config(page_title="Create Quiz – Add Questions", layout="wide")
@@ -70,7 +97,7 @@ def page_add_questions():
         clean_name = "_".join(quiz_name.split("_")[:-1])
     else:
         clean_name = quiz_name
-    st.title(f"📝 {clean_name}")
+    st.title(f" {clean_name}")
 
     # Ensure ss.editing exists
     if "editing" not in ss:
@@ -103,7 +130,7 @@ def page_add_questions():
         with r2c2:
             st.text_input("Choice 4", key="choice3", placeholder="Enter fourth choice")
 
-    col_left, col_right = st.columns([1.2, 0.1])
+    col_left, col_right = st.columns([1.2, 0.2])
 
     # PUBLISH
     with col_left:
@@ -120,8 +147,17 @@ def page_add_questions():
                 ss.publishing = False
                 ss.publish_start_time = None
                 st.warning("⏰ Publishing timeout. Please try again.")
-                
-        if st.button("PUBLISH QUIZ", disabled=ss.publishing):
+        
+        if current_count < 1:
+            button_type = "primary"  # Can't be secondary with no questions
+        elif is_edit_mode and current_count == original_count:
+            button_type = "primary"
+        elif not editor_changed():
+            button_type = "primary"
+        else:
+            button_type = "secondary"
+        
+        if st.button("PUBLISH QUIZ", disabled=ss.publishing, type=button_type):
             if len(ss.quiz_tuples) < 1:
                 st.error("You must add at least 1 question before publishing.")
             elif ss.publishing:
@@ -206,10 +242,13 @@ def page_add_questions():
                     ss.publishing = False
                     ss.publish_start_time = None
                     ss.new_quiz_name = None  # Clear the new quiz name
+                    ss.create_open = False  # Close the create dialog
+                    ss.selected_quiz_id = None  # Clear selected quiz
+                    ss.quiz_loaded = False  # Reset loaded state
                     reset_editor()
                     ss.is_editing = False
                     ss.refresh_widgets = True
-                    st.rerun()
+                    st.switch_page("pages/0_Home_Page.py")
 
                 except requests.exceptions.RequestException as e:
                     ss.publishing = False
@@ -227,7 +266,7 @@ def page_add_questions():
 
         # ADD
         if not ss.is_editing:
-            if st.button("ADD"):
+            if st.button("ADD", type="primary"):
                 # Append a copy so editor typing won't mutate saved list
                 ss.quiz_tuples.append((qtext, tuple([v0, v1, v2, v3]), correct_idx))
                 ss.last_published_quiz = None  # Reset published tracking when adding questions
@@ -239,14 +278,17 @@ def page_add_questions():
 
         # UPDATE
         if ss.is_editing:
-            if st.button("UPDATE"):
+            update_btn_type = "secondary" if editor_changed() else "primary"
+            if st.button("UPDATE", type=update_btn_type):
                 if 0 <= ss.cursor < len(ss.quiz_tuples):
-                    ss.quiz_tuples[ss.cursor] = (qtext, tuple([v0, v1, v2, v3]), correct_idx)
+                    qtext, (v0, v1, v2, v3), correct_idx = get_editor_values()
+                    ss.quiz_tuples[ss.cursor] = (qtext, (v0, v1, v2, v3), correct_idx)
                     st.success("Question updated!")
                 reset_editor()
                 ss.is_editing = False
                 ss.refresh_widgets = True
                 st.rerun()
+
 
     total = len(ss.get("quiz_tuples", []))
     st.caption(f"Total questions: {total}")
@@ -261,7 +303,7 @@ def page_add_questions():
 
             # Show as a button to load into editor
             with col_q:
-                if st.button(f"Fråga {i+1}: {qtext}", key=f"show_q_{i}"):
+                if st.button(f"Fråga {i+1}: {qtext}", key=f"show_q_{i}", type="tertiary"):
                     ss.editing = {"text": qtext, "choices": list(choices), "correct_index": correct_idx}
                     ss.cursor = i
                     ss.is_editing = True
@@ -269,7 +311,7 @@ def page_add_questions():
                     st.rerun()
 
             with col_edit:
-                if st.button(" Edit", key=f"edit{i}"):
+                if st.button(" Edit", key=f"edit{i}", type="tertiary"):
                     ss.editing = {"text": qtext, "choices": list(choices), "correct_index": correct_idx}
                     ss.cursor = i
                     ss.is_editing = True
@@ -277,7 +319,7 @@ def page_add_questions():
                     st.rerun()
 
             with col_delete:
-                if st.button(" Delete", key=f"delete{i}"):
+                if st.button(" Delete", key=f"delete{i}", type="tertiary"):
                     ss.quiz_tuples.pop(i)
                     st.success(f"Question {i + 1} deleted.")
                     reset_editor()
@@ -303,6 +345,7 @@ if quiz_id and "quiz_loaded" not in st.session_state:
         st.session_state.quiz_tuples = [
             (q["question_text"], (q["choice_1"], q["choice_2"], q["choice_3"], q["choice_4"]), q["answer"]) for q in questions
         ]
+        st.session_state.original_question_count = len(questions)  # Track original count
         st.session_state.quiz_loaded = True
 
 page_add_questions()
