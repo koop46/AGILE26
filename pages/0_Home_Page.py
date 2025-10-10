@@ -3,7 +3,7 @@ import streamlit as st
 import sys
 from rel.crud_operations import ResourceClient
 from app import API_BASE
-from pages.styles.logo import clickable_logo
+from pages.styles.logo import clickable_logo, load_css as load_logo_css
 
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 quiz_table = ResourceClient(base_url=API_BASE, endpoint_path="/quizzes/")
@@ -38,8 +38,10 @@ def clean_quiz_name_for_display(quiz_name):
 
 
 load_css()
+load_logo_css()  # Load logo-specific CSS
 clickable_logo()
-st.markdown("---")
+
+
 
 @st.dialog("Create a new quiz")
 def create_quiz_dialog():
@@ -59,13 +61,15 @@ def create_quiz_dialog():
 # Centered Create Quiz button
 col1, col2, col3 = st.columns([1, 2, 1])
 with col2:
+    # Wrap the Create Quiz button in a custom styled container
+    st.markdown('<div class="create-quiz-button-container">', unsafe_allow_html=True)
     if st.button("Create a Quiz", key="main_quiz_button", type="primary", use_container_width=True):
         st.session_state.create_open = True
         st.rerun()  # Rerun to show the dialog immediately
-
-# Show dialog only if create_open is True
-if st.session_state.create_open:
-    create_quiz_dialog()
+    st.markdown('</div>', unsafe_allow_html=True)
+    # Show dialog only if create_open is True
+    if st.session_state.create_open:
+        create_quiz_dialog()
 
 # List quizzes
 quizzes = quiz_table.get_all()
@@ -79,14 +83,16 @@ with c2:
             qid = quiz.get("id")
             col_a, col_b, col_c = st.columns([4, 1, 1])
             with col_a:
-                st.write(f"• {clean_title}")
+                st.markdown(f':blue-background[• {clean_title}]')
             with col_b:
-                if qid is not None and st.button("Edit", key=f"edit_{qid}"):
-                    st.session_state["selected_quiz_id"] = qid
+                if qid is not None and st.button("Edit", key=f"edit_{qid}", type="secondary"):
+                    st.session_state["selected_quiz_id"] = int(qid)
+                    st.session_state.create_open = False  # Close dialog when editing
                     st.switch_page("pages/1_Create_Quiz.py")
             with col_c:
-                if qid is not None and st.button("Take", key=f"take_{qid}"):
+                if qid is not None and st.button("Take", key=f"take_{qid}",type="secondary"):
                     st.session_state["selected_quiz_id"] = qid
+                    st.session_state.create_open = False  # Close dialog when taking quiz
                     st.switch_page("pages/5_Quiz_Preview.py")
     else:
         st.info("No quizzes. Create one to get started!")
