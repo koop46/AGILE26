@@ -117,7 +117,7 @@ class QuizResultResponse(QuizResultBase):
     id: int
 
     class Config:
-        orm_mode = True # "orm_mode = True" tells Pydantic to allow parsing data from ORM objects (like SQLAlchemy models), not just dicts.
+        from_attributes = True # "from_attributes = True" tells Pydantic to allow parsing data from ORM objects (like SQLAlchemy models), not just dicts.
         
 
 

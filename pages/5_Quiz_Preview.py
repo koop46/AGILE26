@@ -36,7 +36,28 @@ load_css(css_path)
 
 
 clickable_logo()
-st.markdown("---")
+
+@st.dialog("Are you sure you want to delete the quiz?")
+def create_quiz_dialog():
+    if st.button("REMOVE"):
+        if quiz_id:
+            if quiz_table.delete(quiz_id):
+                st.success("✅ Quiz deleted!")
+                # Clear state so preview doesn't keep stale ID
+                st.session_state.pop("selected_quiz_id", None)
+                # Go back to Home page
+                st.switch_page("pages/0_Home_Page.py")
+        else:
+            st.warning("No quiz to delete.")
+        
+        # Store the quiz name for later use, don't create quiz yet
+        st.session_state["new_quiz_name"] = name.strip()
+        st.session_state["selected_quiz_id"] = None  # No existing quiz
+        st.session_state.create_open = False
+        st.success("✅ Ready to create quiz!")
+        st.switch_page("pages/1_Create_Quiz.py")
+
+
 
 r1c1, r1c2, r1c3 = st.columns([0.2, 1, 0.2])
 
@@ -126,20 +147,14 @@ if "editing" in st.session_state:
 r5c1, r5c2, r5c3 = st.columns([1, 1, 1])
 
 with r5c1:
-    if st.button("Remove", key="remove"):
-        if quiz_id:
-            if quiz_table.delete(quiz_id):
-                st.success("✅ Quiz deleted!")
-                # Clear state so preview doesn't keep stale ID
-                st.session_state.pop("selected_quiz_id", None)
-                # Go back to Home page
-                st.switch_page("pages/0_Home_Page.py")
-        else:
-            st.warning("No quiz selected.")
+    if st.button("Remove", type="secondary"):
+        st.session_state.create_open = True
+    if st.session_state.create_open:
+        create_quiz_dialog()
 
 
 with r5c2:
-    if st.button("Edit", key="edit"):
+    if st.button("Edit", type="primary"):
         if quiz_id:
             st.session_state["selected_quiz_id"] = int(quiz_id)
             st.switch_page("pages/1_Create_Quiz.py")
@@ -148,7 +163,7 @@ with r5c2:
 
 
 with r5c3:
-    if st.button("Run Quiz", key="run"):
+    if st.button("Run Quiz", type="primary"):
         st.info("Run Quiz button pressed (not implemented yet).")
 
 
