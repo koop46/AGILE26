@@ -1,13 +1,13 @@
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
-from api.database import engine, get_db 
-from api.models import Base, User
-from api.security import get_password_hash
+from database import engine, get_db 
+from models import Base, User
+from security import get_password_hash
 from sqlalchemy.orm import Session
 import os
-from api.routers import users, quizzes, submissions
+from routers import users, quizzes, submissions
 from dotenv import load_dotenv
-from api import schemas
+
 
 #from sqlmodel import Session
 

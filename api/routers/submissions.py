@@ -1,8 +1,8 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from api.database import get_db
-from api.schemas import SubmissionRequest, SubmissionResponse
-from api.kirkpatrick import KirkpatrickModel
+from database import get_db
+from schemas import SubmissionRequest, SubmissionResponse
+from kirkpatrick import KirkpatrickModel
 
 
 #from api.models import Quiz

@@ -1,8 +1,8 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from api.database import get_db
-from api.models import Quiz, Question
-from api.schemas import QuizCreate, QuizResponse, QuizUpdate, QnaBase
+from database import get_db
+from models import Quiz, Question
+from schemas import QuizCreate, QuizResponse, QuizUpdate, QnaBase
 from typing import List
 
 
