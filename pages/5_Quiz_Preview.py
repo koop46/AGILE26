@@ -61,11 +61,10 @@ with r1c2:
                 unsafe_allow_html=True
             )
 
-            # --- first question ---
+            #  first question
             questions = quiz_data.get("questions", [])
             if questions:
                 first_q = questions[0]
-                # Use correct field names from the Question model
                 q_text = first_q.get("question_text", "")
                 choices = [
                     first_q.get("choice_1", ""),
@@ -88,7 +87,7 @@ with r1c2:
     else:
         st.warning("No quiz selected. Go back and pick one.")
 
-# --- render question text ---
+# render question text
 if "editing" in st.session_state:
     e = st.session_state.editing
     r2c1, r2c2, r2c3 = st.columns([0.2, 1, 0.2])
@@ -102,7 +101,7 @@ if "editing" in st.session_state:
             unsafe_allow_html=True
         )
 
-    # ---- render choices ----
+    #  render choices
     def show_choice(i, placeholder):
         txt = e["choices"][i] or placeholder
         st.markdown(
@@ -129,10 +128,9 @@ with r5c1:
     if st.button("Remove", key="remove"):
         if quiz_id:
             if quiz_table.delete(quiz_id):
-                st.success("✅ Quiz deleted!")
-                # Clear state so preview doesn't keep stale ID
+                st.success(" Quiz deleted!")
                 st.session_state.pop("selected_quiz_id", None)
-                # Go back to Home page
+              
                 st.switch_page("pages/0_Home_Page.py")
         else:
             st.warning("No quiz selected.")
@@ -149,7 +147,25 @@ with r5c2:
 
 with r5c3:
     if st.button("Run Quiz", key="run"):
-        st.info("Run Quiz button pressed (not implemented yet).")
+        if quiz_id:
+            for key in list(st.session_state.keys()):
+                if key.startswith("choice_"):
+                    del st.session_state[key]
+
+            st.session_state.current_question_index = 0
+            st.session_state.score = 0
+            st.session_state.user_answers = []
+            st.session_state.quiz_started = False  
+
+            # Set the selected quiz ID and go to Take Quiz
+            st.session_state["selected_quiz_id"] = int(quiz_id)
+            st.switch_page("pages/2_Take_Quiz.py")
+        else:
+            st.warning("No quiz selected.")
+
+            
+        #st.info("Run Quiz button pressed (not implemented yet).")
+        
 
 
 

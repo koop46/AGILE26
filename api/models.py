@@ -1,5 +1,5 @@
 from sqlalchemy import Boolean, Column, DateTime, Integer, String, ForeignKey
-from database import Base
+from api.database import Base
 from datetime import datetime, timezone
 from sqlalchemy.orm import relationship
 
@@ -16,7 +16,8 @@ class User(Base):
     updated_at = Column(DateTime, default=lambda: datetime.now(timezone.utc),
                         onupdate=lambda: datetime.now(timezone.utc))
 
-    quiz_results = relationship("QuizResult", back_populates="user")
+    #  Lazy loading optimization
+    quiz_results = relationship("QuizResult", back_populates="user", lazy="selectin")
 
 
 # ---------------- Quizzes & Questions ----------------
@@ -27,22 +28,22 @@ class Quiz(Base):
     quiz_name = Column(String, nullable=False)
     is_active = Column(Boolean, default=True, nullable=False)
     number_question = Column(Integer, nullable=False)
-    creator_id = Column(Integer, nullable=False)  # FK to users.id later if you want
+    creator_id = Column(Integer, nullable=False)
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
     updated_at = Column(DateTime, default=lambda: datetime.now(timezone.utc),
                         onupdate=lambda: datetime.now(timezone.utc))
 
-    # relations
-    quiz_results = relationship("QuizResult", back_populates="quiz")
+    #  Faster joins using selectin
+    quiz_results = relationship("QuizResult", back_populates="quiz", lazy="selectin")
     questions = relationship("Question", back_populates="quiz",
-                             cascade="all, delete-orphan")
+                             cascade="all, delete-orphan", lazy="selectin")
 
 
 class Question(Base):
     __tablename__ = "questions"
 
     qna_id = Column(Integer, primary_key=True, nullable=False)
-    quiz_id = Column(Integer, ForeignKey("quizzes.id"), nullable=False)  # <-- add FK
+    quiz_id = Column(Integer, ForeignKey("quizzes.id"), nullable=False)
     question_text = Column(String, nullable=False)
 
     choice_1 = Column(String, nullable=False)
@@ -52,18 +53,19 @@ class Question(Base):
 
     answer = Column(Integer, nullable=False)
 
-    # relation back to quiz
-    quiz = relationship("Quiz", back_populates="questions")
+    # Load related quiz efficiently
+    quiz = relationship("Quiz", back_populates="questions", lazy="selectin")
 
 
-# ---------------- Sessions (to satisfy QuizResult.session_id) ----------------
+# ---------------- Sessions ----------------
 class AppSession(Base):
-    __tablename__ = "sessions"  # IMPORTANT: matches FK below
+    __tablename__ = "sessions"
 
     id = Column(Integer, primary_key=True)
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 
-    quiz_results = relationship("QuizResult", back_populates="session")
+    #  Load all quiz results in one go when needed
+    quiz_results = relationship("QuizResult", back_populates="session", lazy="selectin")
 
 
 # ---------------- Quiz Results ----------------
@@ -72,15 +74,15 @@ class QuizResult(Base):
 
     id = Column(Integer, primary_key=True)
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
-    quiz_id = Column(Integer, ForeignKey("quizzes.id"), nullable=False)      # <-- add FK
-    session_id = Column(Integer, ForeignKey("sessions.id"), nullable=True)   # <-- fix table name
+    quiz_id = Column(Integer, ForeignKey("quizzes.id"), nullable=False)
+    session_id = Column(Integer, ForeignKey("sessions.id"), nullable=True)
 
     question_count = Column(Integer, nullable=False)
     score = Column(Integer, nullable=False)
     taken_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
-    time_taken = Column(Integer, nullable=False)  # seconds
+    time_taken = Column(Integer, nullable=False)
 
-    # relationships
-    user = relationship("User", back_populates="quiz_results")
-    quiz = relationship("Quiz", back_populates="quiz_results")
-    session = relationship("AppSession", back_populates="quiz_results")
+    #  Add lazy="selectin" everywhere for efficient joins
+    user = relationship("User", back_populates="quiz_results", lazy="selectin")
+    quiz = relationship("Quiz", back_populates="quiz_results", lazy="selectin")
+    session = relationship("AppSession", back_populates="quiz_results", lazy="selectin")

@@ -1,8 +1,12 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from database import get_db
-from schemas import SubmissionRequest, SubmissionResponse
-from kirkpatrick import KirkpatrickModel
+from api.database import get_db
+from api.schemas import SubmissionRequest, SubmissionResponse
+from api.kirkpatrick import KirkpatrickModel
+
+
+#from api.models import Quiz
+#from typing import List
 
 router = APIRouter(
     tags=["submission"]
