@@ -22,12 +22,11 @@ if "is_editing" not in ss:
 if "cursor" not in ss:
     ss.cursor = 0
 if "refresh_widgets" not in ss:
-    ss.refresh_widgets = True  # force first-time widget init
+    ss.refresh_widgets = True  
 
                
 # Change button type based on edit mode and question count
 # If in edit mode and number of questions unchanged -> primary, otherwise secondary
-# But can't be secondary if there are no questions
 is_edit_mode = ss.get("selected_quiz_id") is not None
 original_count = ss.get("original_question_count", 0)
 current_count = len(ss.quiz_tuples)
@@ -92,31 +91,31 @@ def page_add_questions():
     
 
 
-    # Show quiz name if available
+    # Show quiz name
     quiz_name = ss.get("new_quiz_name") or ss.get("quiz_name", "New Quiz")
-    # Clean the name for display (remove timestamp if present)
     if "_" in quiz_name and quiz_name.split("_")[-1].isdigit():
         clean_name = "_".join(quiz_name.split("_")[:-1])
     else:
         clean_name = quiz_name
     st.title(f" {clean_name}")
 
-    # Ensure ss.editing exists
     if "editing" not in ss:
         reset_editor()
         ss.refresh_widgets = True
 
-    # If flagged, push ss.editing into widgets so the form reflects the model
     if ss.refresh_widgets:
-        set_widgets_from_editing()
-        ss.refresh_widgets = False
+        if ss.get("is_editing", False):
+            set_widgets_from_editing()
+        else:
+            for key in ["editing_text", "choice0", "choice1", "choice2", "choice3", "editing_correct_index"]:
+                st.session_state[key] = "" if not key.endswith("index") else 0
+                ss.refresh_widgets = False
 
     left, main, right = st.columns([1, 3, 1])
 
     with main:
         st.markdown('<div class="question-header">WRITE YOUR QUESTION</div>', unsafe_allow_html=True)
 
-        # Bind widgets ONLY via keys (no value=/index= so we can programmatically set via st.session_state)
         st.text_area("Question Text", key="editing_text", height=120, placeholder="Type your question here…")
         st.radio("Correct Answer", options=[0, 1, 2, 3], key="editing_correct_index", horizontal=True)
 
@@ -136,7 +135,6 @@ def page_add_questions():
 
     # PUBLISH
     with col_left:
-        # Check if we're already publishing to prevent double-clicks
         if "publishing" not in ss:
             ss.publishing = False
             ss.publish_start_time = None
@@ -148,10 +146,10 @@ def page_add_questions():
             if time.time() - ss.publish_start_time > 30:
                 ss.publishing = False
                 ss.publish_start_time = None
-                st.warning("⏰ Publishing timeout. Please try again.")
+                #st.warning("⏰ Publishing timeout. Please try again.")
         
         if current_count < 1:
-            button_type = "primary"  # Can't be secondary with no questions
+            button_type = "primary"
         elif is_edit_mode and current_count == original_count:
             button_type = "primary"
         elif not editor_changed():
@@ -161,23 +159,22 @@ def page_add_questions():
         
         if st.button("PUBLISH QUIZ", disabled=ss.publishing, type=button_type):
             if len(ss.quiz_tuples) < 1:
-                st.error("You must add at least 1 question before publishing.")
+                st.error("You must add at least 1 question.")
             elif ss.publishing:
                 st.warning("Please wait, quiz is being published...")
             elif ss.last_published_quiz == ss.quiz_tuples:
-                st.warning("⚠️ This quiz was already published. Add more questions or make changes before publishing again.")
+                st.warning("This quiz was already published. Add more questions or make changes before publishing again.")
             else:
                 # Set publishing state to prevent double-clicks
                 import time
                 ss.publishing = True
                 ss.publish_start_time = time.time()
-                st.info("🔄 Publishing quiz... Please wait.")
+                st.info("Publishing quiz... Please wait.")
                 
                 # Check if we're editing an existing quiz or creating a new one
                 quiz_id = ss.get("selected_quiz_id")
 
                 if quiz_id:
-                    # EDITING EXISTING QUIZ - Update it
                     quiz_name = ss.get("quiz_name", "Untitled Quiz")
                     quiz_payload = {
                         "quiz_name": quiz_name,
@@ -194,7 +191,7 @@ def page_add_questions():
                         requests.delete(f"{API_BASE}/quizzes/{quiz_id}/questions")
 
                     except requests.exceptions.RequestException as e:
-                        st.error(f"❌ Failed to update quiz: {e}")
+                        st.error(f" Failed to update quiz: {e}")
                         return
                         
                 else:
@@ -216,7 +213,7 @@ def page_add_questions():
                         new_quiz_id = quiz_data["id"]
                         
                     except requests.exceptions.RequestException as e:
-                        st.error(f"❌ Failed to create quiz: {e}")
+                        st.error(f" Failed to create quiz: {e}")
                         return
                 
                 try:
@@ -238,15 +235,21 @@ def page_add_questions():
 
                     # Success - clear state and reset
                     action = "updated" if quiz_id else "created"
-                    st.success(f"✅ Quiz {action} successfully! ID: {new_quiz_id} ({questions_added} questions)")
-                    ss.last_published_quiz = ss.quiz_tuples.copy()  # Track what was published
+                    st.success(f" Quiz {action} successfully! ID: {new_quiz_id} ({questions_added} questions)")
+                    st.cache_data.clear()
+                    for key in ["quiz_loaded", "fetched_quiz"]:
+                        if key in st.session_state:
+                            del st.session_state[key]
+                            
+                            
+                    ss.last_published_quiz = ss.quiz_tuples.copy()  
                     ss.quiz_tuples = []
                     ss.publishing = False
                     ss.publish_start_time = None
-                    ss.new_quiz_name = None  # Clear the new quiz name
-                    ss.create_open = False  # Close the create dialog
-                    ss.selected_quiz_id = None  # Clear selected quiz
-                    ss.quiz_loaded = False  # Reset loaded state
+                    ss.new_quiz_name = None  
+                    ss.create_open = False  
+                    ss.selected_quiz_id = None  
+                    ss.quiz_loaded = False  
                     reset_editor()
                     ss.is_editing = False
                     ss.refresh_widgets = True
@@ -255,23 +258,21 @@ def page_add_questions():
                 except requests.exceptions.RequestException as e:
                     ss.publishing = False
                     ss.publish_start_time = None
-                    st.error(f"❌ Network error: {e}")
+                    st.error(f" Network error: {e}")
                 except Exception as e:
                     ss.publishing = False
                     ss.publish_start_time = None
-                    st.error(f"❌ Failed to publish quiz: {e}")
+                    st.error(f" Failed to publish quiz: {e}")
 
-    # ADD / UPDATE
+    # ADD / 
     with col_right:
-        # Read current editor (scratchpad)
         qtext, (v0, v1, v2, v3), correct_idx = get_editor_values()
 
         # ADD
         if not ss.is_editing:
             if st.button("ADD", type="primary"):
-                # Append a copy so editor typing won't mutate saved list
                 ss.quiz_tuples.append((qtext, tuple([v0, v1, v2, v3]), correct_idx))
-                ss.last_published_quiz = None  # Reset published tracking when adding questions
+                ss.last_published_quiz = None  
                 st.success("Question added!")
                 reset_editor()
                 ss.is_editing = False
