@@ -12,9 +12,6 @@ quiz_id = st.session_state.get("selected_quiz_id")
 st.set_page_config(page_title="Quiz Preview", layout="centered")
 ss = st.session_state
 
-
-
-
 # Initialize editing state if not exists
 if "editing" not in ss:
     ss.editing = {"text": "", "choices": ["", "", "", ""], "correct_index": 0}
@@ -44,7 +41,7 @@ def create_quiz_dialog():
     if st.button("REMOVE"):
         if quiz_id:
             if quiz_table.delete(quiz_id):
-                st.success("✅ Quiz deleted!")
+                st.success(" Quiz deleted!")
                 # Clear state so preview doesn't keep stale ID
                 st.session_state.pop("selected_quiz_id", None)
                 # Go back to Home page
@@ -53,10 +50,10 @@ def create_quiz_dialog():
             st.warning("No quiz to delete.")
         
         # Store the quiz name for later use, don't create quiz yet
-        st.session_state["new_quiz_name"] = name.strip()
+        st.session_state["new_quiz_name"] = ""
         st.session_state["selected_quiz_id"] = None  # No existing quiz
         st.session_state.create_open = False
-        st.success("✅ Ready to create quiz!")
+        st.success("Ready to create quiz!")
         st.switch_page("pages/1_Create_Quiz.py")
 
 
@@ -66,7 +63,6 @@ r1c1, r1c2, r1c3 = st.columns([0.2, 1, 0.2])
 with r1c2:
     if quiz_id:
         try:
-            ### Hämtar ###
             quiz_data = quiz_table.get_one(quiz_id)
                          
             # Clean quiz name for display
@@ -75,7 +71,6 @@ with r1c2:
                 clean_quiz_name = "_".join(raw_quiz_name.split("_")[:-1])
             else:
                 clean_quiz_name = raw_quiz_name
-            
             st.markdown(
                 f"""
                 <div class="quiz-preview-box">
@@ -111,7 +106,7 @@ with r1c2:
     else:
         st.warning("No quiz selected. Go back and pick one.")
 
-# render question text
+
 if "editing" in st.session_state:
     e = st.session_state.editing
     r2c1, r2c2, r2c3 = st.columns([0.2, 1, 0.2])
@@ -125,7 +120,7 @@ if "editing" in st.session_state:
             unsafe_allow_html=True
         )
 
-    #  render choices
+    #  choices
     def show_choice(i, placeholder):
         txt = e["choices"][i] or placeholder
         st.markdown(
@@ -163,10 +158,39 @@ with r5c1:
 with r5c2:
     if st.button("Edit", type="primary"):
         if quiz_id:
-            st.session_state["selected_quiz_id"] = int(quiz_id)
-            st.switch_page("pages/1_Create_Quiz.py")
+            try:
+                quiz_data = quiz_table.get_one(quiz_id)
+                questions = quiz_data.get("questions", [])
+                
+                # Store everything needed in session_state
+                st.session_state["selected_quiz_id"] = int(quiz_id)
+                
+                raw_name = quiz_data.get("quiz_name", "Untitled Quiz")
+                if "_" in raw_name and raw_name.split("_")[-1].isdigit():
+                    clean_name = "_".join(raw_name.split("_")[:-1])
+                else:
+                    clean_name = raw_name
+
+                st.session_state.quiz_name = clean_name
+
+                st.session_state.creator_id = quiz_data.get("creator_id", 1)
+                st.session_state.quiz_tuples = [
+                    (
+                        q["question_text"],
+                        (q["choice_1"], q["choice_2"], q["choice_3"], q["choice_4"]),
+                        q["answer"]
+                    )
+                    for q in questions
+                ]
+                st.session_state.original_question_count = len(questions)
+                st.session_state.quiz_loaded = True
+                st.switch_page("pages/1_Create_Quiz.py")
+
+            except Exception as e:
+                st.error(f" Failed to load quiz for editing: {e}")
         else:
             st.warning("No quiz selected.")
+
 
 
 with r5c3:
@@ -181,7 +205,6 @@ with r5c3:
             st.session_state.user_answers = []
             st.session_state.quiz_started = False  
 
-            # Set the selected quiz ID and go to Take Quiz
             st.session_state["selected_quiz_id"] = int(quiz_id)
             st.switch_page("pages/2_Take_Quiz.py")
         else:
