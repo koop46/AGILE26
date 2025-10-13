@@ -64,7 +64,7 @@ def show_take_quiz_dialog():
     show_warning = False
     
     col1, col2 = st.columns(2)
-    with col1:
+    with col2:
         if st.button("Start Quiz", key="start_quiz_button", use_container_width=True):
             # Säkerställer att båda fälten är ifyllda (.strip tar bort whitespace)
             if not quiz_input.strip() or not username_input.strip():
@@ -74,16 +74,7 @@ def show_take_quiz_dialog():
                 # Spara användarens val i session_state
                 st.session_state["selected_quiz_id_or_name"] = quiz_input.strip()
                 st.session_state["username"] = username_input.strip()
-
-                # Stäng pop-up och navigerar till Take_Quiz-sidan
-                st.session_state.take_open = False
-                st.session_state["current_page"] = "take_quiz"
-                st.rerun()
-
-    with col2:
-        if st.button("Cancel", key="cancel_quiz_button", use_container_width=True):
-            st.session_state.take_open = False
-            st.rerun()
+                st.switch_page("pages/2_Take_Quiz.py")
 
     # Visa varningen efter layouten, så inte Cancel-knappen försvinner.
     if show_warning:
@@ -105,55 +96,25 @@ def main():
     </div>
     """, unsafe_allow_html=True)
 
-    
-     # --- Initiera flaggan för pop-up --- #
-    if "take_open" not in st.session_state:
-        st.session_state.take_open = False
 
     
     # --- Knapparna Create Quiz och Take Quiz --- #
     col1, col2 = st.columns(2)
     with col1:
         if st.button("📘 Take Quiz", key="take_quiz_button", use_container_width=True):
-            st.session_state.take_open = True
+            show_take_quiz_dialog()
     with col2:
         if st.button("✏️ Create Quiz", key="create_quiz_button", use_container_width=True):
-            st.session_state["current_page"] = "create_quiz"
-            st.rerun()
-
-
-
-    # --- Visa pop-upen om flaggan är aktiv --- #
-    if st.session_state.take_open:
-        show_take_quiz_dialog()
-    
-
+            st.switch_page("pages/0_Home_Page.py")
 
 
     # --- Info-text längst ner --- #
     st.info("👈 Use the sidebar to navigate between different pages of the application.")
 
 
-
-
-
-# Förklaring till koden nedan:
-# 1. Detta skapar en variabel i minnet som heter "current_page". Den börjar som "home".
-# 2. If-statements kontrollerar variabeln för att se vilken sida vi "vill till".
-# 3. "st.switch_page" navigerar till den sidan variabeln är uppdaterad till.
-
 if __name__ == "__main__":
-    if "current_page" not in st.session_state:
-        st.session_state["current_page"] = "home"
+    main()
 
-    if st.session_state["current_page"] == "create_quiz":
-        st.switch_page("pages/0_Home_Page.py")
-
-    elif st.session_state["current_page"] == "take_quiz":
-        st.switch_page("pages/2_Take_Quiz.py")
-
-    else:
-        main() 
 
 
 
