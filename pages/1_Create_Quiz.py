@@ -14,6 +14,22 @@ sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 quiz_table = ResourceClient(base_url=API_BASE, endpoint_path="/quizzes/")
 quiz_id = st.session_state.get("selected_quiz_id")
 
+# --- Reset state ONLY when starting a completely new quiz ---
+if "new_quiz_name" in st.session_state and not st.session_state.get("selected_quiz_id"):
+    if not st.session_state.get("quiz_initialized", False):
+        
+        for key in ["quiz_tuples", "quiz_name", "creator_id", "original_question_count", "quiz_loaded"]:
+            if key in st.session_state:
+                del st.session_state[key]
+        st.session_state.quiz_tuples = []
+        st.session_state.is_editing = False
+        st.session_state.cursor = 0
+        st.session_state.refresh_widgets = True
+
+        # Mark that initialization is complete
+        st.session_state.quiz_initialized = True
+
+
 ss = st.session_state
 if "quiz_tuples" not in ss:
     ss.quiz_tuples = []
@@ -23,6 +39,9 @@ if "cursor" not in ss:
     ss.cursor = 0
 if "refresh_widgets" not in ss:
     ss.refresh_widgets = True  
+if "new_question_mode" not in ss:
+    ss.new_question_mode = True  
+
 
                
 # Change button type based on edit mode and question count
@@ -103,13 +122,25 @@ def page_add_questions():
         reset_editor()
         ss.refresh_widgets = True
 
+    #if ss.refresh_widgets:
+    #    if ss.get("is_editing", False):
+    #        set_widgets_from_editing()
+    #    else:
+    #        for key in ["editing_text", "choice0", "choice1", "choice2", "choice3", "editing_correct_index"]:
+    #            st.session_state[key] = "" if not key.endswith("index") else 0
+     #           ss.refresh_widgets = False
+                
     if ss.refresh_widgets:
-        if ss.get("is_editing", False):
+        if ss.get("is_editing", False) and not ss.get("new_question_mode", True):
+        # Load existing question into the editor
             set_widgets_from_editing()
         else:
-            for key in ["editing_text", "choice0", "choice1", "choice2", "choice3", "editing_correct_index"]:
-                st.session_state[key] = "" if not key.endswith("index") else 0
-                ss.refresh_widgets = False
+            st.session_state["editing_text"] = ""
+            st.session_state["editing_correct_index"] = 0
+            for i in range(4):
+                st.session_state[f"choice{i}"] = ""
+        ss.refresh_widgets = False
+
 
     left, main, right = st.columns([1, 3, 1])
 
@@ -117,7 +148,10 @@ def page_add_questions():
         st.markdown('<div class="question-header">WRITE YOUR QUESTION</div>', unsafe_allow_html=True)
 
         st.text_area("Question Text", key="editing_text", height=120, placeholder="Type your question here…")
-        st.radio("Correct Answer", options=[0, 1, 2, 3], key="editing_correct_index", horizontal=True)
+        #st.radio("Correct Answer", options=[0, 1, 2, 3], key="editing_correct_index", horizontal=True)
+        selected_correct = st.radio("Correct Answer", options=[1, 2, 3,4],index=st.session_state.get("editing_correct_index", 0),horizontal=True)
+        st.session_state["editing_correct_index"] = selected_correct - 1
+
 
         r1c1, r1c2 = st.columns(2, gap="large")
         with r1c1:
@@ -272,12 +306,14 @@ def page_add_questions():
         if not ss.is_editing:
             if st.button("ADD", type="primary"):
                 ss.quiz_tuples.append((qtext, tuple([v0, v1, v2, v3]), correct_idx))
-                ss.last_published_quiz = None  
+                #ss.last_published_quiz = None  
                 st.success("Question added!")
                 reset_editor()
                 ss.is_editing = False
+                ss.new_question_mode = True
                 ss.refresh_widgets = True
                 st.rerun()
+                
 
         # UPDATE
         if ss.is_editing:
@@ -289,6 +325,7 @@ def page_add_questions():
                     st.success("Question updated!")
                 reset_editor()
                 ss.is_editing = False
+                ss.new_question_mode = True 
                 ss.refresh_widgets = True
                 st.rerun()
 
@@ -319,6 +356,7 @@ def page_add_questions():
                     ss.cursor = i
                     ss.is_editing = True
                     ss.refresh_widgets = True
+                    ss.new_question_mode = False
                     st.rerun()
 
             with col_delete:

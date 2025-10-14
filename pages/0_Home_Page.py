@@ -86,14 +86,32 @@ with c2:
                 st.markdown(f':blue-background[• {clean_title}]')
             with col_b:
                 if qid is not None and st.button("Edit", key=f"edit_{qid}", type="secondary"):
+                    for key in ["quiz_loaded", "quiz_tuples"]:
+                        if key in st.session_state:
+                            del st.session_state[key]
+                    if "new_quiz_name" in st.session_state:
+                        del st.session_state["new_quiz_name"]
                     st.session_state["selected_quiz_id"] = int(qid)
-                    st.session_state.create_open = False  # Close dialog when editing
+                    st.session_state.create_open = False
                     st.switch_page("pages/1_Create_Quiz.py")
+
             with col_c:
-                if qid is not None and st.button("Take", key=f"take_{qid}",type="secondary"):
+                #if qid is not None and st.button("Take", key=f"take_{qid}",type="secondary"):
+                #    for key in ["current_question_index", "user_answers", "score", "quiz_started","results_payload"]:
+                #        if key in st.session_state:
+                #            del st.session_state[key]
+                #    st.session_state["selected_quiz_id"] = qid
+                #    st.session_state.create_open = False  # Close dialog when taking quiz
+                #    st.switch_page("pages/5_Quiz_Preview.py")
+                if qid is not None and st.button("Take", key=f"take_{qid}", type="secondary"):
+                    for key in ["current_question_index","user_answers","score","quiz_started","results_payload","student_name"]:
+                        if key in st.session_state:
+                            del st.session_state[key]
+                    st.cache_data.clear()
                     st.session_state["selected_quiz_id"] = qid
-                    st.session_state.create_open = False  # Close dialog when taking quiz
+                    st.session_state.create_open = False
                     st.switch_page("pages/5_Quiz_Preview.py")
+
     else:
         st.info("No quizzes. Create one to get started!")
 

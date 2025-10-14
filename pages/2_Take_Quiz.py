@@ -46,17 +46,7 @@ quiz_name = clean_quiz_name(quiz_data.get("quiz_name", "Untitled Quiz"))
 st.markdown(f"## {quiz_name}")
 
 
-#name 
-if not ss.quiz_started:
-    st.write("Enter your name:")
-    ss.student_name = st.text_input("Your name:", key="student_name_input")
-    if st.button("Start Quiz"):
-        if not ss.student_name.strip():
-            st.warning("Please enter your name to start.")
-        else:
-            ss.quiz_started = True
-            st.rerun()
-    st.stop()
+
 
 st.markdown(f"**Good luck, {ss.student_name}!** ")
 
