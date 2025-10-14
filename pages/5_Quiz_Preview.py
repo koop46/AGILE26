@@ -36,6 +36,16 @@ load_css(css_path)
 
 clickable_logo()
 
+
+@st.dialog("Quiz Information")
+def show_quiz_id_dialog(quiz_id):
+    st.markdown(f"**Selected Quiz ID:** `{quiz_id}`")
+    if st.button("OK"):
+        st.rerun()
+
+    if st.button("Home"):
+        st.switch_page("app.py")
+
 @st.dialog("Are you sure you want to delete the quiz?")
 def create_quiz_dialog():
     if st.button("REMOVE"):
@@ -191,22 +201,12 @@ with r5c2:
         else:
             st.warning("No quiz selected.")
 
-
-
+# Ändrade Run Quiz-knappen till "Show QuizID"-knapp
 with r5c3:
-    if st.button("Run Quiz", key="run"):
+    if st.button("Show QuizID", key="run"):
         if quiz_id:
-            for key in list(st.session_state.keys()):
-                if key.startswith("choice_"):
-                    del st.session_state[key]
-
-            st.session_state.current_question_index = 0
-            st.session_state.score = 0
-            st.session_state.user_answers = []
-            st.session_state.quiz_started = False  
-
-            st.session_state["selected_quiz_id"] = int(quiz_id)
-            st.switch_page("pages/2_Take_Quiz.py")
+            # Visa popup med quiz-id
+            show_quiz_id_dialog(quiz_id)
         else:
             st.warning("No quiz selected.")
 

@@ -72,7 +72,7 @@ def show_take_quiz_dialog():
             else:
                 # Allt OK -- Spara info och byt sida
                 # Spara användarens val i session_state
-                st.session_state["selected_quiz_id_or_name"] = quiz_input.strip()
+                st.session_state["selected_quiz_id"] = quiz_input.strip()
                 st.session_state["username"] = username_input.strip()
                 st.switch_page("pages/2_Take_Quiz.py")
 
