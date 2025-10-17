@@ -146,16 +146,22 @@ st.markdown("""
 cols = st.columns(2)
 clicked_choice = None
 
+choice_labels = ["Choice 1", "Choice 2", "Choice 3", "Choice 4"]
+
 for i, text in enumerate(choices):
     col = cols[i % 2]
     with col:
-        selected = (prev_answer == i)
+        st.markdown(
+            f"<div style='font-weight:600; color:#374151; margin-bottom:4px;'>{choice_labels[i]}</div>",
+            unsafe_allow_html=True
+        )
         with st.container():
             st.markdown('<div class="big-choice">', unsafe_allow_html=True)
             clicked = st.button(text, key=f"choice_{idx}_{i}", use_container_width=True)
             st.markdown('</div>', unsafe_allow_html=True)
         if clicked:
             clicked_choice = i
+
 
 if clicked_choice is not None:
     record_answer(idx, clicked_choice)

@@ -15,6 +15,7 @@ ss.setdefault("create_open", False)
 ss.setdefault("create_quiz_name", "")
 
 
+
 # CSS
 def load_css():
     with open("pages/styles/0_Home_Page.css", encoding="utf-8") as f:
@@ -96,13 +97,6 @@ with c2:
                     st.switch_page("pages/1_Create_Quiz.py")
 
             with col_c:
-                #if qid is not None and st.button("Take", key=f"take_{qid}",type="secondary"):
-                #    for key in ["current_question_index", "user_answers", "score", "quiz_started","results_payload"]:
-                #        if key in st.session_state:
-                #            del st.session_state[key]
-                #    st.session_state["selected_quiz_id"] = qid
-                #    st.session_state.create_open = False  # Close dialog when taking quiz
-                #    st.switch_page("pages/5_Quiz_Preview.py")
                 if qid is not None and st.button("Take", key=f"take_{qid}", type="secondary"):
                     for key in ["current_question_index","user_answers","score","quiz_started","results_payload","student_name"]:
                         if key in st.session_state:
