@@ -72,9 +72,12 @@ def show_take_quiz_dialog():
             else:
                 # Allt OK -- Spara info och byt sida
                 # Spara användarens val i session_state
+                username = username_input.strip()
                 st.session_state["selected_quiz_id"] = quiz_input.strip()
-                st.session_state["username"] = username_input.strip()
+                st.session_state["username"] = username
+                st.session_state["student_name"] = username  
                 st.switch_page("pages/2_Take_Quiz.py")
+
 
     # Visa varningen efter layouten, så inte Cancel-knappen försvinner.
     if show_warning:
@@ -101,15 +104,15 @@ def main():
     # --- Knapparna Create Quiz och Take Quiz --- #
     col1, col2 = st.columns(2)
     with col1:
-        if st.button("📘 Take Quiz", key="take_quiz_button", use_container_width=True):
+        if st.button(" Take Quiz", key="take_quiz_button", use_container_width=True):
             show_take_quiz_dialog()
     with col2:
-        if st.button("✏️ Create Quiz", key="create_quiz_button", use_container_width=True):
+        if st.button(" Create Quiz", key="create_quiz_button", use_container_width=True):
             st.switch_page("pages/0_Home_Page.py")
 
 
     # --- Info-text längst ner --- #
-    st.info("👈 Use the sidebar to navigate between different pages of the application.")
+    st.info(" Use the sidebar to navigate between different pages of the application.")
 
 
 if __name__ == "__main__":

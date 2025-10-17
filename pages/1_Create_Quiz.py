@@ -180,7 +180,7 @@ def page_add_questions():
             if time.time() - ss.publish_start_time > 30:
                 ss.publishing = False
                 ss.publish_start_time = None
-                #st.warning("⏰ Publishing timeout. Please try again.")
+                #st.warning(" Publishing timeout. Please try again.")
         
         if current_count < 1:
             button_type = "primary"
@@ -191,15 +191,25 @@ def page_add_questions():
         else:
             button_type = "secondary"
         
-        if st.button("PUBLISH QUIZ", disabled=ss.publishing, type=button_type):
-            if len(ss.quiz_tuples) < 1:
-                st.error("You must add at least 1 question.")
+         # Disable publish button if there are fewer than 3 questions
+        disable_publish = ss.publishing or len(ss.quiz_tuples) < 3
+        publish_label = (
+            "PUBLISH QUIZ"
+            if len(ss.quiz_tuples) >= 3
+            else "Add at least 3 questions to publish"
+        )
+
+        if st.button(publish_label, disabled=disable_publish, type=button_type):
+            if len(ss.quiz_tuples) < 3:
+                st.error(" You must add at least 3 questions before publishing.")
             elif ss.publishing:
-                st.warning("Please wait, quiz is being published...")
+                st.warning(" Please wait, quiz is being published...")
             elif ss.last_published_quiz == ss.quiz_tuples:
                 st.warning("This quiz was already published. Add more questions or make changes before publishing again.")
             else:
-                # Set publishing state to prevent double-clicks
+                # Start publishing process
+                
+                
                 import time
                 ss.publishing = True
                 ss.publish_start_time = time.time()
