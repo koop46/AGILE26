@@ -36,18 +36,19 @@ load_css(css_path)
 
 clickable_logo()
 
-
 @st.dialog("Quiz Information")
 def show_quiz_id_dialog(quiz_id):
     st.markdown(f"**Selected Quiz ID:** `{quiz_id}`")
-    if st.button("OK"):
-        st.rerun()
-
-    if st.button("Home"):
-        st.switch_page("app.py")
+    col_ok, col_home = st.columns([1, 1], gap="small")
+    with col_ok:
+        if st.button("OK", use_container_width=True, type="primary"):
+            st.rerun()
+    with col_home:
+        if st.button("Take", use_container_width=True, type="primary"):
+            st.switch_page("app.py")
 
 @st.dialog("Are you sure you want to delete the quiz?")
-def create_quiz_dialog():
+def remove_quiz_dialog():
     if st.button("REMOVE"):
         if quiz_id:
             if quiz_table.delete(quiz_id):
@@ -156,11 +157,9 @@ r5c1, r5c2, r5c3 = st.columns([1, 1, 1])
 with r5c1:
     if st.button("Remove", key="remove"):
         if quiz_id:
-            if quiz_table.delete(quiz_id):
-                st.success(" Quiz deleted!")
-                st.session_state.pop("selected_quiz_id", None)
-              
-                st.switch_page("pages/0_Home_Page.py")
+            st.session_state.create_open = True
+        if st.session_state.create_open:
+            remove_quiz_dialog()    
         else:
             st.warning("No quiz selected.")
 
@@ -203,16 +202,18 @@ with r5c2:
 
 # Ändrade Run Quiz-knappen till "Show QuizID"-knapp
 with r5c3:
-    if st.button("Show QuizID", key="run"):
+    if st.button("Show QuizID", type="primary"):
         if quiz_id:
             # Visa popup med quiz-id
             show_quiz_id_dialog(quiz_id)
         else:
             st.warning("No quiz selected.")
 
+           
+
             
-        #st.info("Run Quiz button pressed (not implemented yet).")
         
+
 
 
 
